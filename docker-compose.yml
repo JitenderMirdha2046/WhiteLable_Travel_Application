@@ -1,0 +1,206 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: travel-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/init-dbs.sql:/docker-entrypoint-initdb.d/init-dbs.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - travel-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: travel-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - travel-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: travel-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - travel-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: travel-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    networks:
+      - travel-network
+
+  user-service:
+    build: ./user-service
+    container_name: travel-user-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travel_user_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - travel-network
+
+  trip-service:
+    build: ./trip-service
+    container_name: travel-trip-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travel_trip_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_REDIS_HOST: redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    volumes:
+      - trip-uploads:/app/uploads
+    restart: unless-stopped
+    networks:
+      - travel-network
+
+  ai-service:
+    build: ./ai-service
+    container_name: travel-ai-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travel_trip_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-placeholder-key}
+      GEMINI_API_URL: ${GEMINI_API_URL:-https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent}
+      WEATHER_API_KEY: ${WEATHER_API_KEY:-placeholder-key}
+      WEATHER_API_URL: ${WEATHER_API_URL:-https://api.openweathermap.org/data/2.5}
+    extra_hosts:
+      - "host.docker.internal:192.168.1.37"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - travel-network
+
+  notification-service:
+    build: ./notification-service
+    container_name: travel-notification-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - travel-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: travel-api-gateway
+    ports:
+      - "8090:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: tenant-service
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://trip-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/tenants/**
+      SPRING_CLOUD_GATEWAY_ROUTES_0_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: user-service
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://user-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/api/auth/**
+      SPRING_CLOUD_GATEWAY_ROUTES_1_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_1_FILTERS_1: Tenant
+      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: trip-service
+      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://trip-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/api/trips/**
+      SPRING_CLOUD_GATEWAY_ROUTES_2_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_2_FILTERS_1: Tenant
+      SPRING_CLOUD_GATEWAY_ROUTES_2_FILTERS_2: Auth
+      SPRING_CLOUD_GATEWAY_ROUTES_3_ID: ai-service
+      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://ai-service:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/api/ai/**
+      SPRING_CLOUD_GATEWAY_ROUTES_3_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_3_FILTERS_1: Tenant
+      SPRING_CLOUD_GATEWAY_ROUTES_4_ID: super-admin
+      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://trip-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/api/super/**
+      SPRING_CLOUD_GATEWAY_ROUTES_4_FILTERS_0: StripPrefix=0
+    depends_on:
+      user-service:
+        condition: service_started
+      trip-service:
+        condition: service_started
+      ai-service:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - travel-network
+
+  frontend:
+    build: ./frontend
+    container_name: travel-frontend
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+    networks:
+      - travel-network
+
+volumes:
+  postgres-data:
+  trip-uploads:
+
+networks:
+  travel-network:
+    driver: bridge

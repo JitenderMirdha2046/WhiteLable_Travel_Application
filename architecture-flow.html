@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelProject — Architecture & Entity Flow</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-family: 'Courier New', 'Consolas', monospace;
+    padding: 1.5rem;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: 1px; }
+  h2 { font-size: 0.9rem; font-weight: 700; margin: 1rem 0 0.5rem; border-bottom: 2px solid #000; padding-bottom: 2px; }
+  h3 { font-size: 0.8rem; font-weight: 700; margin: 0.5rem 0; }
+  .subtitle { font-size: 0.7rem; margin-bottom: 1rem; color: #555; }
+  hr { border: none; border-top: 1px solid #999; margin: 0.75rem 0; }
+
+  /* Sections */
+  .section { border: 2px solid #000; padding: 0.75rem; margin-bottom: 0.75rem; }
+  .section-title { font-weight: 700; font-size: 0.8rem; margin-bottom: 0.4rem; }
+
+  .flex-row { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+  .flex-center { display: flex; align-items: center; justify-content: center; }
+  .flex-col { display: flex; flex-direction: column; align-items: center; }
+
+  /* Entity table */
+  .entity { border: 2px solid #000; display: inline-block; min-width: 220px; margin: 0.25rem; vertical-align: top; }
+  .entity-header { background: #000; color: #fff; padding: 4px 8px; font-weight: 700; font-size: 0.75rem; text-align: center; }
+  .entity-row { padding: 2px 8px; border-top: 1px solid #ccc; font-size: 0.65rem; }
+  .entity-row b { font-weight: 700; }
+  .entity-row .pk { font-weight: 700; text-decoration: underline; }
+  .entity-row .fk { font-style: italic; }
+  .entity-row .null { color: #888; }
+
+  /* Flow boxes */
+  .flow-box {
+    border: 2px solid #000;
+    padding: 6px 12px;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #fff;
+    min-width: 100px;
+  }
+  .flow-box.small { min-width: auto; padding: 3px 8px; font-size: 0.6rem; font-weight: 400; }
+  .flow-box.gateway { border-width: 3px; }
+  .flow-box.grey { background: #f0f0f0; }
+  .flow-box.dashed { border-style: dashed; }
+
+  .arrow-h { display: inline-block; margin: 0 4px; font-size: 1rem; color: #555; }
+  .arrow-v { display: block; text-align: center; font-size: 0.8rem; color: #555; margin: 2px 0; }
+
+  .tag { display: inline-block; border: 1px solid #000; padding: 0 4px; font-size: 0.55rem; margin: 1px; background: #fff; }
+
+  .entity-group { display: flex; gap: 0.5rem; align-items: flex-start; flex-wrap: wrap; margin: 0.5rem 0; }
+  .connector { font-size: 1.2rem; color: #555; margin: 0 0.25rem; }
+
+  .logo { font-size: 1.2rem; font-weight: 700; letter-spacing: 2px; border: 2px solid #000; display: inline-block; padding: 4px 12px; }
+  .logo small { font-size: 0.6rem; font-weight: 400; letter-spacing: 0; }
+
+  .legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.6rem; margin-top: 0.5rem; }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-box { width: 14px; height: 14px; border: 2px solid #000; }
+  .legend-box.dashed { border-style: dashed; }
+  .legend-box.grey { background: #f0f0f0; }
+  .legend-box.filled { background: #000; }
+
+  .note { font-size: 0.6rem; color: #555; border: 1px solid #ccc; padding: 4px 8px; margin: 0.25rem 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="flex-center" style="justify-content:space-between; align-items:center;">
+  <div class="logo">TRAVEL<span style="font-weight:300;">PROJECT</span> <small>Architecture &amp; Entity Flow</small></div>
+  <div style="font-size:0.6rem; color:#555;">v1.0 · Microservices · Event-Driven</div>
+</div>
+
+<hr>
+
+<!-- ======================== TOP-LEVEL FLOW ======================== -->
+<h2>▸ Superficial Flow</h2>
+
+<div class="flex-row flex-center" style="gap:2px; flex-wrap:wrap;">
+
+  <div class="flex-col">
+    <div class="flow-box">🌐 Browser<br><span style="font-weight:400;font-size:0.6rem;">React 18 :5173</span></div>
+  </div>
+
+  <div class="arrow-h">→</div>
+
+  <div class="flex-col">
+    <div class="flow-box gateway">🚪 API Gateway<br><span style="font-weight:400;font-size:0.6rem;">Spring Cloud :8080</span></div>
+    <div style="font-size:0.55rem;color:#555;margin-top:2px;">JWT Filter · Route /api/*</div>
+  </div>
+
+  <div class="arrow-h">→</div>
+
+  <div class="flex-col">
+    <div class="flow-box">👤 User Service<br><span style="font-weight:400;font-size:0.6rem;">:8081</span></div>
+    <div style="font-size:0.55rem;color:#555;margin-top:2px;">Register · Login · JWT</div>
+  </div>
+
+  <div class="arrow-h">→</div>
+
+  <div class="flex-col">
+    <div class="flow-box">🗺️ Trip Service<br><span style="font-weight:400;font-size:0.6rem;">:8082</span></div>
+    <div style="font-size:0.55rem;color:#555;margin-top:2px;">CRUD · Redis · Rate Limit</div>
+    <div class="tag">Kafka Producer</div>
+  </div>
+
+  <div class="arrow-h">→</div>
+
+  <div class="flex-col">
+    <div class="flow-box dashed">⚡ Kafka<br><span style="font-weight:400;font-size:0.6rem;">trip-events</span></div>
+  </div>
+
+  <div class="arrow-h">→</div>
+
+  <div class="flex-col">
+    <div class="flow-box">🤖 AI Service<br><span style="font-weight:400;font-size:0.6rem;">:8083</span></div>
+    <div style="font-size:0.55rem;color:#555;margin-top:2px;">Itinerary · Weather</div>
+    <div class="tag">Kafka Consumer</div>
+    <div class="tag">Gemini API</div>
+  </div>
+
+  <div class="arrow-h">→</div>
+
+  <div class="flex-col">
+    <div class="flow-box">🔔 Notification<br><span style="font-weight:400;font-size:0.6rem;">:8084</span></div>
+    <div style="font-size:0.55rem;color:#555;margin-top:2px;">Log events</div>
+    <div class="tag">Kafka Consumer</div>
+  </div>
+
+</div>
+
+<!-- Arrow down to infra -->
+<div class="arrow-v">↓</div>
+
+<div class="flex-row flex-center" style="gap:2px; flex-wrap:wrap;">
+  <div class="flow-box small grey">🐘 PostgreSQL<br><span style="font-weight:400;">travel_user_db · travel_trip_db</span></div>
+  <div class="flow-box small grey">📀 Redis 7<br><span style="font-weight:400;">Cache</span></div>
+  <div class="flow-box small grey">🦎 Zookeeper<br><span style="font-weight:400;">:2181</span></div>
+  <div class="flow-box small grey">📨 Kafka 7.5<br><span style="font-weight:400;">:9092</span></div>
+</div>
+
+<div class="note">Docker (travel-network bridge): All containers run inside Docker. Frontend via nginx :80 or Vite :5173.</div>
+
+<hr>
+
+<!-- ======================== EVENT FLOW ======================== -->
+<h2>▸ Event Flow (Async via Kafka)</h2>
+
+<div style="font-size:0.7rem;">
+
+<div class="flex-row" style="align-items:flex-start;">
+  <div style="min-width:120px;"><b>Trip Service</b> produces:</div>
+  <div>
+    <span class="tag">TRIP_CREATED</span> <span style="color:#555;">{ tripId, userId }</span><br>
+    <span class="tag">TRIP_REPLAN</span> <span style="color:#555;">{ tripId, userId, instruction }</span><br>
+    <span class="tag">COMPARE_REQUESTED</span> <span style="color:#555;">{ userId, destination }</span>
+  </div>
+  <div style="margin-left:1rem; font-weight:700;">→</div>
+  <div style="min-width:80px; text-align:center;"><b>Kafka</b><br><span style="font-size:0.6rem;">trip-events</span></div>
+  <div style="margin-left:1rem; font-weight:700;">→</div>
+  <div style="min-width:120px;"><b>AI Service</b> consumes:</div>
+  <div>
+    TRIP_CREATED → generate itinerary + weather + budget<br>
+    TRIP_REPLAN → regenerate with instruction<br>
+    COMPARE_REQUESTED → generate 3 plans (budget/luxury/adventure)
+  </div>
+</div>
+
+<div class="flex-row" style="margin-top:4px;">
+  <div style="min-width:120px;"><b>Notification</b> consumes:</div>
+  <div>
+    <span class="tag">TRIP_CREATED</span> <span class="tag">TRIP_COMPLETED</span> <span class="tag">TRIP_FAILED</span>
+    <span style="color:#555;">→ log notification</span>
+  </div>
+</div>
+
+</div>
+
+<hr>
+
+<!-- ======================== DATABASE ENTITIES ======================== -->
+<h2>▸ Database Entities &amp; Mappings</h2>
+
+<h3>Database: <code>travel_user_db</code></h3>
+
+<div class="entity-group">
+
+<div class="entity">
+  <div class="entity-header">users</div>
+  <div class="entity-row"><span class="pk">id</span> UUID <span style="color:#888;">PK</span></div>
+  <div class="entity-row"><b>name</b> VARCHAR(100) NOT NULL</div>
+  <div class="entity-row"><b>email</b> VARCHAR(100) NOT NULL <span style="color:#888;">UNIQUE</span></div>
+  <div class="entity-row"><b>password</b> VARCHAR(255) NOT NULL</div>
+  <div class="entity-row"><b>created_at</b> DATETIME NOT NULL</div>
+</div>
+
+</div>
+
+<h3>Database: <code>travel_trip_db</code></h3>
+
+<div class="entity-group">
+
+<div class="entity">
+  <div class="entity-header">trips</div>
+  <div class="entity-row"><span class="pk">id</span> UUID <span style="color:#888;">PK</span></div>
+  <div class="entity-row"><span class="fk">user_id</span> UUID <span style="color:#888;">FK → users.id</span></div>
+  <div class="entity-row"><b>destination</b> VARCHAR(100) NOT NULL</div>
+  <div class="entity-row"><b>budget</b> DECIMAL(10,2) NOT NULL</div>
+  <div class="entity-row"><b>days</b> INT NOT NULL</div>
+  <div class="entity-row"><b>travel_type</b> VARCHAR(50) NOT NULL</div>
+  <div class="entity-row"><b>mood_description</b> TEXT <span class="null">NULL</span></div>
+  <div class="entity-row"><b>trip_status</b> VARCHAR(30) <span class="null">NULL</span></div>
+  <div class="entity-row"><b>weather_summary</b> TEXT <span class="null">NULL</span></div>
+  <div class="entity-row"><b>cache_used</b> BOOLEAN <span class="null">NULL</span></div>
+  <div class="entity-row"><b>total_estimated_cost</b> DECIMAL(10,2) <span class="null">NULL</span></div>
+  <div class="entity-row"><b>itinerary</b> TEXT <span class="null">NULL</span></div>
+  <div class="entity-row"><b>status</b> VARCHAR(20) NOT NULL <span style="color:#888;">DEFAULT 'PENDING'</span></div>
+  <div class="entity-row"><b>created_at</b> DATETIME NOT NULL</div>
+</div>
+
+<div class="flex-col flex-center" style="padding:0 4px;">
+  <div style="border-left:2px solid #000; height:30px;"></div>
+  <div style="border:1px solid #000; padding:1px 6px; font-size:0.55rem; background:#f0f0f0;">trip_id</div>
+  <div style="border-left:2px solid #000; height:30px;"></div>
+</div>
+
+<div class="entity">
+  <div class="entity-header">trip_budget</div>
+  <div class="entity-row"><span class="pk">id</span> UUID <span style="color:#888;">PK</span></div>
+  <div class="entity-row"><span class="fk">trip_id</span> UUID <span style="color:#888;">FK → trips.id</span></div>
+  <div class="entity-row"><b>hotel_cost</b> DECIMAL(10,2)</div>
+  <div class="entity-row"><b>food_cost</b> DECIMAL(10,2)</div>
+  <div class="entity-row"><b>transport_cost</b> DECIMAL(10,2)</div>
+  <div class="entity-row"><b>activity_cost</b> DECIMAL(10,2)</div>
+  <div class="entity-row"><b>misc_cost</b> DECIMAL(10,2)</div>
+</div>
+
+<div style="width:100%; margin:4px 0;"></div>
+
+<div class="flex-col flex-center" style="padding:0 4px;">
+  <div style="border-left:2px solid #000; height:30px;"></div>
+  <div style="border:1px solid #000; padding:1px 6px; font-size:0.55rem; background:#f0f0f0;">user_id</div>
+  <div style="border-left:2px solid #000; height:30px;"></div>
+</div>
+
+<div class="entity">
+  <div class="entity-header">trip_comparison</div>
+  <div class="entity-row"><span class="pk">id</span> UUID <span style="color:#888;">PK</span></div>
+  <div class="entity-row"><span class="fk">user_id</span> UUID <span style="color:#888;">FK → users.id</span></div>
+  <div class="entity-row"><b>destination</b> VARCHAR(100) NOT NULL</div>
+  <div class="entity-row"><b>comparison_type</b> VARCHAR(50) NOT NULL</div>
+  <div class="entity-row"><b>itinerary</b> TEXT <span class="null">NULL</span></div>
+</div>
+
+</div>
+
+<div class="note">
+  <b>Note:</b> No JPA relationship annotations used anywhere. All foreign keys are logical (plain UUID columns).
+  Joins are done manually in application code. No cascade, no lazy/eager loading.
+</div>
+
+<!-- ======================== TRIP STATUS MACHINE ======================== -->
+<h2>▸ Trip Status Machine</h2>
+
+<div class="flex-row flex-center" style="gap:4px; flex-wrap:wrap; font-size:0.7rem;">
+  <div class="flow-box small">PENDING</div>
+  <div class="arrow-h">→</div>
+  <div class="flow-box small">GENERATING</div>
+  <div class="arrow-h">→</div>
+  <div class="flow-box small">COMPLETED</div>
+  <div style="margin:0 6px; color:#555;">|</div>
+  <div class="arrow-h">→</div>
+  <div class="flow-box small">FAILED</div>
+</div>
+
+<div style="font-size:0.6rem; text-align:center; margin-top:4px; color:#555;">
+  Trip created → Kafka event → AI processes → status updated
+</div>
+
+<hr>
+
+<!-- ======================== LEGEND ======================== -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-box filled"></div> Background fill</div>
+  <div class="legend-item"><div class="legend-box"></div> Default box</div>
+  <div class="legend-item"><div class="legend-box dashed"></div> Dashed = async / external</div>
+  <div class="legend-item"><div class="legend-box grey"></div> Grey = infrastructure</div>
+  <div class="legend-item"><span class="pk">underlined</span> = Primary Key</div>
+  <div class="legend-item"><span class="fk">italic</span> = Foreign Key (logical)</div>
+</div>
+
+<hr style="margin-top:1.5rem;">
+<div style="text-align:center; font-size:0.55rem; color:#999;">
+  TravelProject · React + Spring Boot + Kafka + Docker · Generated from codebase
+</div>
+
+</div>
+</body>
+</html>
