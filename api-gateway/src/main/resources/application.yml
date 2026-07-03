@@ -1,0 +1,64 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: uploads-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/uploads/**
+          filters:
+            - StripPrefix=0
+
+        - id: super-admin-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/super/**
+          filters:
+            - StripPrefix=0
+
+        - id: tenant-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/tenants/**
+          filters:
+            - StripPrefix=0
+
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=0
+            - Tenant
+
+        - id: trip-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/trips/**
+          filters:
+            - StripPrefix=0
+            - Tenant
+            - Auth
+
+        - id: ai-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - StripPrefix=0
+            - Tenant
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin
+
+  main:
+    web-application-type: reactive
+
+app:
+  jwt:
+    secret: 5267556B58703273357638792F423F4528482B4D6251655368566D5971337436
