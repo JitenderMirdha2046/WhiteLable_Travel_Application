@@ -1,0 +1,41 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: ai-service
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: ai-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/travel_trip_db
+    username: travel
+    password: travel123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:placeholder-key}
+    url: ${GEMINI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent}
+
+weather:
+  api:
+    key: ${WEATHER_API_KEY:placeholder-key}
+    url: ${WEATHER_API_URL:https://api.openweathermap.org/data/2.5}

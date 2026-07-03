@@ -1,0 +1,3 @@
+ALTER TABLE tenants
+ADD COLUMN IF NOT EXISTS background_image VARCHAR(500),
+ADD COLUMN IF NOT EXISTS template_style VARCHAR(50) DEFAULT 'modern';
