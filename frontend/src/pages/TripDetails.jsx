@@ -1,0 +1,589 @@
+import { useState, useEffect, useCallback } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { FiMapPin, FiDollarSign, FiCalendar, FiTag, FiDownload, FiShare2, FiArrowLeft, FiTrash2, FiCheck, FiSmile, FiSun, FiRefreshCw, FiBarChart2, FiMap } from 'react-icons/fi'
+import toast from 'react-hot-toast'
+import tripService from '../services/tripService'
+import LoadingSpinner from '../components/LoadingSpinner'
+import { Button } from '../components/ui/button'
+import { Badge } from '../components/ui/badge'
+import { ErrorState } from '../components/ui/error-state'
+import { ConfirmDialog } from '../components/ui/confirm-dialog'
+
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+})
+
+const destinationCoords = {
+  'Goa': [15.4909, 73.8278],
+  'Manali': [32.2396, 77.1887],
+  'Jaipur': [26.9124, 75.7873],
+  'Kerala': [10.8505, 76.2711],
+  'Ladakh': [34.1526, 77.5771],
+  'Udaipur': [24.5854, 73.7125],
+  'Sikkim': [27.5330, 88.5122],
+  'Andaman': [11.7401, 92.6586],
+  'Delhi': [28.7041, 77.1025],
+  'Mumbai': [19.0760, 72.8777],
+  'Bangalore': [12.9716, 77.5946],
+  'Chennai': [13.0827, 80.2707],
+  'Kolkata': [22.5726, 88.3639],
+  'Agra': [27.1767, 78.0081],
+  'Varanasi': [25.3176, 82.9739],
+  'Rishikesh': [30.0869, 78.2676],
+}
+
+const defaultCoords = [20.5937, 78.9629]
+
+export default function TripDetails() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [trip, setTrip] = useState(null)
+  const [budget, setBudget] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [replanning, setReplanning] = useState(false)
+  const [replanInstruction, setReplanInstruction] = useState('')
+  const [showReplanInput, setShowReplanInput] = useState(false)
+  const [polling, setPolling] = useState(false)
+
+  const loadTrip = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await tripService.getById(id)
+      setTrip(data)
+      if (data.budgetBreakdown) setBudget(data.budgetBreakdown)
+      return data
+    } catch (err) {
+      setError(err.message || 'Failed to load trip')
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    loadTrip().then(data => {
+      if (data && (data.tripStatus === 'GENERATING' || data.tripStatus === 'PENDING')) {
+        setPolling(true)
+      }
+    })
+  }, [id])
+
+  useEffect(() => {
+    if (!polling || !id) return
+    const interval = setInterval(async () => {
+      try {
+        const status = await tripService.getStatus(id)
+        if (status.tripStatus === 'COMPLETED') {
+          clearInterval(interval)
+          setPolling(false)
+          await loadTrip()
+          toast.success('Itinerary generated!')
+        } else if (status.tripStatus === 'FAILED') {
+          clearInterval(interval)
+          setPolling(false)
+          toast.error('Generation failed. Try again.')
+          setTrip(prev => prev ? { ...prev, tripStatus: 'FAILED' } : prev)
+        }
+      } catch {
+        clearInterval(interval)
+        setPolling(false)
+      }
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [polling, id, loadTrip])
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      await tripService.remove(id)
+      toast.success('Trip deleted successfully')
+      navigate('/trips', { replace: true })
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete trip')
+    } finally {
+      setDeleting(false)
+      setShowDeleteConfirm(false)
+    }
+  }
+
+  const handleShare = async () => {
+    const url = window.location.href
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${trip?.destination} Trip`, url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        toast.success('Link copied to clipboard!')
+        setTimeout(() => setCopied(false), 2000)
+      }
+    } catch {
+      toast.error('Failed to share')
+    }
+  }
+
+  const handleDownloadPDF = () => {
+    if (!trip) return
+    const content = generatePDFContent(trip)
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${trip.destination}-Itinerary.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Itinerary downloaded!')
+  }
+
+  const handleReplan = async () => {
+    if (!replanInstruction.trim()) {
+      toast.error('Please describe what to change')
+      return
+    }
+    setReplanning(true)
+    try {
+      await tripService.replan({ tripId: id, instruction: replanInstruction })
+      toast.success('Re-plan started!')
+      setShowReplanInput(false)
+      setReplanInstruction('')
+      setTrip(prev => prev ? { ...prev, tripStatus: 'GENERATING' } : prev)
+      setPolling(true)
+    } catch (err) {
+      toast.error(err.message || 'Failed to re-plan')
+    } finally {
+      setReplanning(false)
+    }
+  }
+
+  const handleLoadBudget = async () => {
+    try {
+      const b = await tripService.getBudget(id)
+      setBudget(b)
+    } catch {}
+  }
+
+  const loadBudget = async () => {
+    if (trip?.tripStatus === 'COMPLETED' && !budget) {
+      await handleLoadBudget()
+    }
+  }
+
+  useEffect(() => {
+    if (trip?.tripStatus === 'COMPLETED') loadBudget()
+  }, [trip?.tripStatus])
+
+  if (loading) return <LoadingSpinner text="Loading trip details..." />
+  if (error) return (
+    <div className="max-w-4xl mx-auto">
+      <ErrorState title="Failed to load trip" message={error} onRetry={loadTrip} />
+    </div>
+  )
+  if (!trip) return null
+
+  const isGenerating = trip.tripStatus === 'GENERATING' || trip.tripStatus === 'PENDING'
+  const isFailed = trip.tripStatus === 'FAILED'
+  const isCompleted = trip.tripStatus === 'COMPLETED'
+
+  const itinerary = trip.itinerary || `Day 1: Arrival and local exploration
+- Check into hotel
+- Explore nearby attractions
+- Welcome dinner
+
+Day 2: Main attractions and sightseeing
+- Breakfast at hotel
+- Visit main attractions
+- Lunch at popular café
+
+Day 3: Adventure activities and local cuisine
+- Morning adventure activities
+- Street food tour
+- Sunset viewing
+
+Day 4: Departure and souvenir shopping
+- Breakfast and checkout
+- Souvenir shopping
+- Transfer to airport`
+
+  const days = itinerary.split(/\n\s*\n/).filter(block => block.trim().match(/^Day \d+:/im))
+  const totalBudget = budget
+    ? (budget.hotelCost || 0) + (budget.foodCost || 0) + (budget.transportCost || 0) + (budget.activityCost || 0) + (budget.miscCost || 0)
+    : (trip.totalEstimatedCost || 0)
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        {/* Back Button */}
+        <button onClick={() => navigate(-1)} className="btn-ghost flex items-center gap-2 mb-6 group">
+          <FiArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" /> Back
+        </button>
+
+        {/* Hero Card */}
+        <div className="relative overflow-hidden mb-8 rounded-xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-accent-500/5 to-surface pointer-events-none" />
+          <div className="relative card">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-2xl flex items-center justify-center">
+                  <FiMapPin className="w-8 h-8 text-primary-400" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-white mb-1">{trip.destination}</h1>
+                  <div className="flex items-center gap-2">
+                    <p className="text-gray-400">AI-Generated Itinerary</p>
+                    <Badge variant={isGenerating ? 'warning' : isFailed ? 'danger' : 'success'}>
+                      {isGenerating ? 'Generating...' : isFailed ? 'Failed' : 'Ready'}
+                    </Badge>
+                    {trip.cacheUsed && (
+                      <Badge variant="accent">Cached</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {isCompleted && (
+                  <Button variant="secondary" size="sm" onClick={handleShare}>
+                    {copied ? <FiCheck className="w-4 h-4" /> : <FiShare2 className="w-4 h-4" />}
+                    {copied ? 'Copied' : 'Share'}
+                  </Button>
+                )}
+                <Button variant="secondary" size="sm" onClick={handleDownloadPDF}>
+                  <FiDownload className="w-4 h-4" /> Download
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+                  <FiTrash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-surface-lighter rounded-xl">
+                <FiDollarSign className="w-5 h-5 text-accent-400 mb-2" />
+                <p className="text-xs text-gray-500">Budget</p>
+                <p className="text-sm font-semibold text-white">₹{trip.budget?.toLocaleString()}</p>
+              </div>
+              <div className="p-4 bg-surface-lighter rounded-xl">
+                <FiCalendar className="w-5 h-5 text-primary-400 mb-2" />
+                <p className="text-xs text-gray-500">Duration</p>
+                <p className="text-sm font-semibold text-white">{trip.days} {trip.days === 1 ? 'day' : 'days'}</p>
+              </div>
+              <div className="p-4 bg-surface-lighter rounded-xl">
+                <FiTag className="w-5 h-5 text-emerald-400 mb-2" />
+                <p className="text-xs text-gray-500">Type</p>
+                <p className="text-sm font-semibold text-white">{trip.travelType}</p>
+              </div>
+              <div className="p-4 bg-surface-lighter rounded-xl">
+                <FiMapPin className="w-5 h-5 text-purple-400 mb-2" />
+                <p className="text-xs text-gray-500">Status</p>
+                <p className="text-sm font-semibold text-white">{trip.tripStatus || 'Generated'}</p>
+              </div>
+            </div>
+
+            {trip.createdAt && (
+              <p className="mt-4 text-xs text-gray-500">
+                Created on {new Date(trip.createdAt).toLocaleDateString('en-US', {
+                  day: 'numeric', month: 'long', year: 'numeric',
+                })}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Generating / Failed State */}
+        {isGenerating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="card text-center py-10 mb-8"
+          >
+            <FiRefreshCw className="w-10 h-10 text-primary-400 animate-spin mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Generating Your Itinerary</h2>
+            <p className="text-gray-400">AI is crafting your personalized travel plan. This may take a moment...</p>
+            {polling && (
+              <p className="text-xs text-gray-500 mt-4">Auto-refreshing...</p>
+            )}
+          </motion.div>
+        )}
+
+        {isFailed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="card text-center py-10 mb-8 border-red-500/30"
+          >
+            <h2 className="text-xl font-semibold text-white mb-2">Generation Failed</h2>
+            <p className="text-gray-400 mb-4">Something went wrong while generating your itinerary.</p>
+            <Button onClick={() => { setTrip(prev => prev ? { ...prev, tripStatus: 'GENERATING' } : prev); setPolling(true) }}>
+              Try Again
+            </Button>
+          </motion.div>
+        )}
+
+        {/* Mood Description */}
+        {trip.moodDescription && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="card mb-8"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <FiSmile className="w-4 h-4 text-accent-400" />
+              <h3 className="text-sm font-medium text-white">Mood</h3>
+            </div>
+            <p className="text-gray-400 text-sm">{trip.moodDescription}</p>
+          </motion.div>
+        )}
+
+        {/* Weather Summary */}
+        {trip.weatherSummary && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="card mb-8"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <FiSun className="w-4 h-4 text-yellow-400" />
+              <h3 className="text-sm font-medium text-white">Weather Forecast</h3>
+            </div>
+            <p className="text-gray-400 text-sm">{trip.weatherSummary}</p>
+          </motion.div>
+        )}
+
+        {/* Budget Chart */}
+        {budget && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="card mb-8"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <FiBarChart2 className="w-5 h-5 text-primary-400" />
+              <h2 className="text-xl font-semibold text-white">Budget Breakdown</h2>
+            </div>
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Hotel', value: budget.hotelCost },
+                      { name: 'Food', value: budget.foodCost },
+                      { name: 'Transport', value: budget.transportCost },
+                      { name: 'Activities', value: budget.activityCost },
+                      { name: 'Misc', value: budget.miscCost },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'].map((color, i) => (
+                      <Cell key={i} fill={color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value) => [`₹${Number(value).toLocaleString()}`, '']}
+                    contentStyle={{
+                      background: '#1e293b',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                    }}
+                    labelStyle={{ color: '#94a3b8' }}
+                  />
+                  <Legend
+                    verticalAlign="bottom"
+                    formatter={(value) => <span style={{ color: '#94a3b8', fontSize: '13px' }}>{value}</span>}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="text-center md:text-left min-w-[140px]">
+                <p className="text-sm text-gray-400">Total Estimated</p>
+                <p className="text-2xl font-bold text-white">₹{Number(totalBudget).toLocaleString()}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Map View */}
+        {isCompleted && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="card mb-8"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <FiMap className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-xl font-semibold text-white">Map View</h2>
+            </div>
+            <div className="rounded-xl overflow-hidden h-64" style={{ zIndex: 0 }}>
+              <MapContainer
+                center={destinationCoords[trip.destination] || defaultCoords}
+                zoom={8}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={false}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={destinationCoords[trip.destination] || defaultCoords}>
+                  <Popup>
+                    {trip.destination}
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Itinerary Timeline */}
+        {isCompleted && (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Your Itinerary</h2>
+              <Badge variant="accent">{days.length} {days.length === 1 ? 'day' : 'days'}</Badge>
+            </div>
+
+            <div className="space-y-4">
+              {days.map((day, i) => {
+                const [header, ...rest] = day.split('\n')
+                const dayNumMatch = header.match(/Day\s*(\d+):\s*(.*)/i)
+                if (!dayNumMatch) return null
+                const dayNum = dayNumMatch[1]
+                const dayTitle = dayNumMatch[2]
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="card relative overflow-hidden group"
+                  >
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-500 to-accent-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-start gap-4 pl-2">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <FiMapPin className="w-5 h-5 text-primary-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-semibold text-white">Day {dayNum}</h3>
+                          <span className="text-xs text-gray-500">— {dayTitle}</span>
+                        </div>
+                        {rest.length > 0 && (
+                          <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">{rest.join('\n').trim()}</p>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Actions */}
+        <div className="flex flex-wrap items-center gap-4 mt-8 pb-8">
+          {isCompleted && (
+            <Button onClick={handleDownloadPDF} icon={<FiDownload />}>
+              Download Itinerary
+            </Button>
+          )}
+          <Button variant="secondary" onClick={() => navigate('/create-trip')} icon={<FiMapPin />}>
+            Plan Another Trip
+          </Button>
+          {!showReplanInput ? (
+            <Button variant="secondary" onClick={() => setShowReplanInput(true)} icon={<FiRefreshCw />}>
+              Re-Plan
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <input
+                type="text"
+                placeholder="e.g. Make it more budget-friendly..."
+                value={replanInstruction}
+                onChange={(e) => setReplanInstruction(e.target.value)}
+                className="input-field flex-1 min-w-[200px]"
+                onKeyDown={(e) => e.key === 'Enter' && handleReplan()}
+              />
+              <Button onClick={handleReplan} loading={replanning} size="sm">
+                Go
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => { setShowReplanInput(false); setReplanInstruction('') }}>
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Trip?"
+        message={`Are you sure you want to delete the ${trip.destination} trip? This action cannot be undone.`}
+        confirmText="Delete Trip"
+        loading={deleting}
+      />
+    </div>
+  )
+}
+
+function generatePDFContent(trip) {
+  const line = '='.repeat(50)
+  const sub = '-'.repeat(50)
+  const dayBlocks = (trip.itinerary || '').split(/\n\s*\n/).filter(b => b.trim().match(/^Day \d+:/im))
+
+  const content = [
+    line,
+    '  TRAVEL ITINERARY',
+    `  ${trip.destination}`,
+    line,
+    '',
+    `Destination: ${trip.destination}`,
+    `Budget: ₹${trip.budget?.toLocaleString()}`,
+    `Duration: ${trip.days} days`,
+    `Travel Type: ${trip.travelType}`,
+    `Status: ${trip.tripStatus || 'Generated'}`,
+    trip.moodDescription ? `Mood: ${trip.moodDescription}` : '',
+    trip.weatherSummary ? `Weather: ${trip.weatherSummary}` : '',
+    `Created: ${new Date(trip.createdAt).toLocaleDateString('en-US', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    })}`,
+    '',
+    sub,
+    '  ITINERARY',
+    sub,
+    '',
+  ]
+
+  dayBlocks.forEach(block => {
+    const [header, ...rest] = block.split('\n')
+    const dayMatch = header.match(/^Day\s*\d+:\s*(.*)/i)
+    const dayTitle = dayMatch ? dayMatch[1] : header
+    content.push(`  ${dayTitle}`)
+    if (rest.length > 0) {
+      rest.forEach(r => content.push(`    ${r.trim()}`))
+    }
+    content.push('')
+  })
+
+  content.push(sub, '  Powered by TravelPlanner AI', line)
+  return content.join('\n')
+}
