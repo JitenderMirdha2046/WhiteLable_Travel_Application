@@ -5,6 +5,9 @@ target/
 *.class
 *.iml
 dependency-reduced-pom.xml
+.mvn/
+mvnw
+mvnw.cmd
 
 # Node / Frontend
 node_modules/
@@ -23,7 +26,6 @@ proxy.env
 *.swp
 *.swo
 *~
-*.iml
 .project
 .classpath
 .settings/
@@ -36,10 +38,8 @@ Thumbs.db
 *.log
 logs/
 
-# Docker Volumes (persistent data)
+# Docker Volumes
 docker/volumes/
-
-# Uploaded files (user avatars, logos, backgrounds)
 uploads/
 user-avatars/
 trip-uploads/
@@ -47,23 +47,47 @@ trip-uploads/
 # Build artifacts
 *.zip
 *.tar.gz
-
-# Flyway / DB
 *.sql.bak
 
-# Test reports
+# Test files
 test-results/
 coverage/
 .vitest/
+__tests__/
+*.test.js
+*.test.jsx
+*.test.ts
+setup.js
+
+# Dev proxy / utility scripts
+api-proxy.py
+gemini-proxy.js
+start.sh
+test-e2e-admin-flow.sh
+undo-pgdn-enter.sh
+dns-resolv.conf
+
+# Internal docs / notes
+AGENTS.md
+ACHIEVEMENTS.md
+HOW_TO_START.md
+SESSION_SUMMARY.md
+AI_Travel_Planner_Enhanced_Blueprint.txt
+SRS.md
+architecture-flow.html
+docs/
 
 # Tool configs
 .opencode/
 .poolside/
-SESSION_SUMMARY.md
-ACHIEVEMENTS.md
-dns-resolv.conf
-HOW_TO_START.md
 
-# Root package (not needed)
+# Root package files
 package.json
 package-lock.json
+
+# Default assets
+frontend/public/vite.svg
+index.html
+
+# Docker build configs (not needed in source)
+frontend/.dockerignore
