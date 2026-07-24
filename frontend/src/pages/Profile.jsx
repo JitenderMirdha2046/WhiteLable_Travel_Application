@@ -1,14 +1,16 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FiUser, FiMail, FiLock, FiSave, FiCamera, FiCheck, FiX } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
+import authService from '../services/authService'
+import { updateProfile, uploadAvatar } from '../api/userApi'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 
 export default function Profile() {
-  const { user, logout } = useAuth()
+  const { user, updateUser } = useAuth()
   const fileInputRef = useRef(null)
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -19,6 +21,13 @@ export default function Profile() {
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState(null)
+  const [avatarFile, setAvatarFile] = useState(null)
+
+  useEffect(() => {
+    if (user?.avatarUrl) {
+      setAvatarPreview(user.avatarUrl)
+    }
+  }, [user?.avatarUrl])
 
   const handleAvatarClick = () => fileInputRef.current?.click()
 
@@ -29,9 +38,27 @@ export default function Profile() {
         toast.error('Image must be less than 2MB')
         return
       }
+      setAvatarFile(file)
       const reader = new FileReader()
       reader.onload = (e) => setAvatarPreview(e.target.result)
       reader.readAsDataURL(file)
+    }
+  }
+
+  const handleAvatarUpload = async () => {
+    if (!avatarFile) return
+    try {
+      const res = await uploadAvatar(avatarFile)
+      const newToken = res.data.token
+      authService.setToken(newToken)
+      const payload = JSON.parse(atob(newToken.split('.')[1]))
+      updateUser({
+        avatarUrl: payload.avatarUrl || null,
+      })
+      setAvatarFile(null)
+      toast.success('Avatar updated!')
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to upload avatar')
     }
   }
 
@@ -52,11 +79,26 @@ export default function Profile() {
     if (!validate()) return
     setSaving(true)
     try {
-      await new Promise((r) => setTimeout(r, 1000))
-      toast.success('Profile updated successfully!')
+      const res = await updateProfile({
+        name: form.name,
+        email: form.email,
+        password: form.password || undefined,
+      })
+      const newToken = res.data.token
+      authService.setToken(newToken)
+      const payload = JSON.parse(atob(newToken.split('.')[1]))
+      updateUser({
+        name: payload.name,
+        email: payload.email,
+        avatarUrl: payload.avatarUrl || null,
+      })
       setForm({ ...form, password: '', confirmPassword: '' })
+      toast.success('Profile updated successfully!')
+      if (avatarFile) {
+        await handleAvatarUpload()
+      }
     } catch (err) {
-      toast.error(err.message || 'Failed to update profile')
+      toast.error(err.response?.data?.message || 'Failed to update profile')
     } finally {
       setSaving(false)
     }

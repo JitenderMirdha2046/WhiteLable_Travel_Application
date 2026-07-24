@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import authService from '../services/authService'
+import { getProfile } from '../api/userApi'
 
 const AuthContext = createContext(null)
 
@@ -7,16 +8,28 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const parseToken = (token) => {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return {
+      id: payload.sub,
+      email: payload.email,
+      name: payload.name,
+      avatarUrl: payload.avatarUrl || null,
+      tenantId: payload.tenantId || null,
+    }
+  }
+
   useEffect(() => {
     const token = authService.getToken()
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        setUser({
-          id: payload.sub,
-          email: payload.email,
-          name: payload.name,
-        })
+        const parsed = parseToken(token)
+        setUser(parsed)
+        getProfile().then(res => {
+          if (res.data) {
+            setUser(prev => prev ? { ...prev, avatarUrl: res.data.avatarUrl || null } : prev)
+          }
+        }).catch(() => {})
       } catch {
         authService.logout()
       }
@@ -26,12 +39,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (credentials) => {
     const data = await authService.login(credentials)
-    const payload = JSON.parse(atob(data.token.split('.')[1]))
-    setUser({
-      id: payload.sub,
-      email: payload.email,
-      name: payload.name,
-    })
+    setUser(parseToken(data.token))
     return data
   }, [])
 
@@ -44,8 +52,12 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  const updateUser = useCallback((partial) => {
+    setUser((prev) => (prev ? { ...prev, ...partial } : prev))
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   )

@@ -3,6 +3,8 @@ package com.travel.trip.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -48,6 +50,9 @@ public class Trip {
 
     @Column(columnDefinition = "TEXT")
     private String itinerary;
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TripBudget> budgets = new ArrayList<>();
 
     @Column(nullable = false, length = 20)
     private String status;

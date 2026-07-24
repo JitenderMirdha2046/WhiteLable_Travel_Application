@@ -5,6 +5,12 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+api.interceptors.request.use((config) => {
+  const tenantId = localStorage.getItem('tenant_id')
+  if (tenantId) config.headers['X-Tenant-Id'] = tenantId
+  return config
+})
+
 api.interceptors.response.use(
   (res) => res,
   (err) => {

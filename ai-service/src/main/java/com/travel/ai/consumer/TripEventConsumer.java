@@ -75,7 +75,8 @@ public class TripEventConsumer {
 
             int updated = jdbcTemplate.update(
                 "UPDATE trips SET itinerary = ?, total_estimated_cost = ?, trip_status = ?, weather_summary = ? WHERE id = ?",
-                itinerary, totalCost, "COMPLETED", weatherService.getWeatherSummary(destination), tripUuid
+                itinerary != null && !itinerary.isEmpty() ? itinerary : null,
+                totalCost, "COMPLETED", weatherService.getWeatherSummary(destination), tripUuid
             );
 
             if (updated > 0) {

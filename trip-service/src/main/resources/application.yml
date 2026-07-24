@@ -34,3 +34,7 @@ spring:
 app:
   jwt:
     secret: 5267556B58703273357638792F423F4528482B4D6251655368566D5971337436
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:sk_test_placeholder}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}

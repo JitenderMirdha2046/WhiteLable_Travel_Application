@@ -112,6 +112,9 @@ export default function PlatformLanding() {
           <span className="text-xl font-bold gradient-text">TravelProject</span>
         </Link>
         <div className="flex items-center gap-4">
+          <Link to="/pricing" className="text-sm text-gray-400 hover:text-primary-400 transition-colors">
+            Pricing
+          </Link>
           <Link to="/super-admin/login" className="text-sm text-gray-400 hover:text-primary-400 transition-colors hidden sm:block">
             <FiShield className="w-3.5 h-3.5 inline mr-1" />Super Admin
           </Link>
@@ -376,6 +379,14 @@ export default function PlatformLanding() {
               </button>
             </motion.div>
           ))}
+        </div>
+        <div className="text-center mt-10">
+          <Link
+            to="/pricing"
+            className="inline-flex items-center gap-2 text-sm text-primary-400 hover:text-primary-300 transition-colors"
+          >
+            Compare all plans & features <FiArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 

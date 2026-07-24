@@ -108,6 +108,7 @@ export default function LandingPage() {
           <span className="text-xl font-bold gradient-text">{agencyName}</span>
         </Link>
         <div className="flex items-center gap-4">
+          <Link to="/pricing" className="text-sm text-gray-400 hover:text-white transition-colors">Pricing</Link>
           <Link to="/login" className="btn-secondary">Sign In</Link>
           <Link to="/register" className="btn-primary">Get Started</Link>
         </div>

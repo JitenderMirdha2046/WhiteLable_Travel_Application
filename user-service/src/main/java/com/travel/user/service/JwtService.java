@@ -24,12 +24,13 @@ public class JwtService {
         this.expiration = expiration;
     }
 
-    public String generateToken(UUID userId, String email, String name, UUID tenantId) {
+    public String generateToken(UUID userId, String email, String name, UUID tenantId, String avatarUrl) {
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim("email", email)
                 .claim("name", name)
                 .claim("tenantId", tenantId != null ? tenantId.toString() : "")
+                .claim("avatarUrl", avatarUrl != null ? avatarUrl : "")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(secretKey)

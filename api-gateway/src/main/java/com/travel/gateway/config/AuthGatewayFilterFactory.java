@@ -55,6 +55,8 @@ public class AuthGatewayFilterFactory extends AbstractGatewayFilterFactory<AuthG
 
             if (tenantId != null && !tenantId.isBlank()) {
                 requestBuilder.header("X-Tenant-Id", tenantId);
+            } else {
+                requestBuilder.header("X-Tenant-Id", "");
             }
 
             exchange = exchange.mutate()

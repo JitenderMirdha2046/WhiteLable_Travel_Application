@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { FiMapPin, FiDollarSign, FiCalendar, FiTag, FiDownload, FiShare2, FiArrowLeft, FiTrash2, FiCheck, FiSmile, FiSun, FiRefreshCw, FiBarChart2, FiMap } from 'react-icons/fi'
+import { FiMapPin, FiDollarSign, FiCalendar, FiTag, FiDownload, FiShare2, FiArrowLeft, FiTrash2, FiCheck, FiSmile, FiSun, FiRefreshCw, FiBarChart2 } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import tripService from '../services/tripService'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -13,34 +10,7 @@ import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
 import { ErrorState } from '../components/ui/error-state'
 import { ConfirmDialog } from '../components/ui/confirm-dialog'
-
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-})
-
-const destinationCoords = {
-  'Goa': [15.4909, 73.8278],
-  'Manali': [32.2396, 77.1887],
-  'Jaipur': [26.9124, 75.7873],
-  'Kerala': [10.8505, 76.2711],
-  'Ladakh': [34.1526, 77.5771],
-  'Udaipur': [24.5854, 73.7125],
-  'Sikkim': [27.5330, 88.5122],
-  'Andaman': [11.7401, 92.6586],
-  'Delhi': [28.7041, 77.1025],
-  'Mumbai': [19.0760, 72.8777],
-  'Bangalore': [12.9716, 77.5946],
-  'Chennai': [13.0827, 80.2707],
-  'Kolkata': [22.5726, 88.3639],
-  'Agra': [27.1767, 78.0081],
-  'Varanasi': [25.3176, 82.9739],
-  'Rishikesh': [30.0869, 78.2676],
-}
-
-const defaultCoords = [20.5937, 78.9629]
+import LeafletMapWrapper from '../components/LeafletMapWrapper'
 
 export default function TripDetails() {
   const { id } = useParams()
@@ -198,25 +168,7 @@ export default function TripDetails() {
   const isFailed = trip.tripStatus === 'FAILED'
   const isCompleted = trip.tripStatus === 'COMPLETED'
 
-  const itinerary = trip.itinerary || `Day 1: Arrival and local exploration
-- Check into hotel
-- Explore nearby attractions
-- Welcome dinner
-
-Day 2: Main attractions and sightseeing
-- Breakfast at hotel
-- Visit main attractions
-- Lunch at popular café
-
-Day 3: Adventure activities and local cuisine
-- Morning adventure activities
-- Street food tour
-- Sunset viewing
-
-Day 4: Departure and souvenir shopping
-- Breakfast and checkout
-- Souvenir shopping
-- Transfer to airport`
+  const itinerary = trip.itinerary || ''
 
   const days = itinerary.split(/\n\s*\n/).filter(block => block.trim().match(/^Day \d+:/im))
   const totalBudget = budget
@@ -420,36 +372,7 @@ Day 4: Departure and souvenir shopping
         )}
 
         {/* Map View */}
-        {isCompleted && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card mb-8"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <FiMap className="w-5 h-5 text-emerald-400" />
-              <h2 className="text-xl font-semibold text-white">Map View</h2>
-            </div>
-            <div className="rounded-xl overflow-hidden h-64" style={{ zIndex: 0 }}>
-              <MapContainer
-                center={destinationCoords[trip.destination] || defaultCoords}
-                zoom={8}
-                style={{ height: '100%', width: '100%' }}
-                scrollWheelZoom={false}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={destinationCoords[trip.destination] || defaultCoords}>
-                  <Popup>
-                    {trip.destination}
-                  </Popup>
-                </Marker>
-              </MapContainer>
-            </div>
-          </motion.div>
-        )}
+        {isCompleted && <LeafletMapWrapper destination={trip.destination} />}
 
         {/* Itinerary Timeline */}
         {isCompleted && (
@@ -459,40 +382,47 @@ Day 4: Departure and souvenir shopping
               <Badge variant="accent">{days.length} {days.length === 1 ? 'day' : 'days'}</Badge>
             </div>
 
-            <div className="space-y-4">
-              {days.map((day, i) => {
-                const [header, ...rest] = day.split('\n')
-                const dayNumMatch = header.match(/Day\s*(\d+):\s*(.*)/i)
-                if (!dayNumMatch) return null
-                const dayNum = dayNumMatch[1]
-                const dayTitle = dayNumMatch[2]
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    className="card relative overflow-hidden group"
-                  >
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-500 to-accent-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="flex items-start gap-4 pl-2">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <FiMapPin className="w-5 h-5 text-primary-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-semibold text-white">Day {dayNum}</h3>
-                          <span className="text-xs text-gray-500">— {dayTitle}</span>
+            {!itinerary ? (
+              <div className="card text-center py-10">
+                <h3 className="text-lg font-semibold text-white mb-2">No Itinerary Available</h3>
+                <p className="text-gray-400">The itinerary content is empty. Try re-planning or check back later.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {days.map((day, i) => {
+                  const [header, ...rest] = day.split('\n')
+                  const dayNumMatch = header.match(/Day\s*(\d+):\s*(.*)/i)
+                  if (!dayNumMatch) return null
+                  const dayNum = dayNumMatch[1]
+                  const dayTitle = dayNumMatch[2]
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.08 }}
+                      className="card relative overflow-hidden group"
+                    >
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-500 to-accent-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="flex items-start gap-4 pl-2">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <FiMapPin className="w-5 h-5 text-primary-400" />
                         </div>
-                        {rest.length > 0 && (
-                          <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">{rest.join('\n').trim()}</p>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-lg font-semibold text-white">Day {dayNum}</h3>
+                            <span className="text-xs text-gray-500">— {dayTitle}</span>
+                          </div>
+                          {rest.length > 0 && (
+                            <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">{rest.join('\n').trim()}</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                )
-              })}
-            </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            )}
           </>
         )}
 

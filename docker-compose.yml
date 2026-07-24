@@ -73,6 +73,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travel_user_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      APP_UPLOAD_DIR: /app/uploads/avatars
+    volumes:
+      - user-avatars:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -92,6 +95,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_REDIS_HOST: redis
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
     depends_on:
       postgres:
         condition: service_healthy
@@ -117,11 +122,11 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       GEMINI_API_KEY: ${GEMINI_API_KEY:-placeholder-key}
-      GEMINI_API_URL: ${GEMINI_API_URL:-https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent}
+      GEMINI_API_URL: ${GEMINI_API_URL:-http://host.docker.internal:3090/gemini}
       WEATHER_API_KEY: ${WEATHER_API_KEY:-placeholder-key}
-      WEATHER_API_URL: ${WEATHER_API_URL:-https://api.openweathermap.org/data/2.5}
+      WEATHER_API_URL: ${WEATHER_API_URL:-http://host.docker.internal:3090/weather}
     extra_hosts:
-      - "host.docker.internal:192.168.1.37"
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -152,31 +157,49 @@ services:
     ports:
       - "8090:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: tenant-service
-      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://trip-service:8082
-      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/tenants/**
+      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: uploads-avatars
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://user-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/uploads/avatars/**
       SPRING_CLOUD_GATEWAY_ROUTES_0_FILTERS_0: StripPrefix=0
-      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: user-service
-      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://user-service:8081
-      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/api/auth/**
+      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: uploads-service
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://trip-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/uploads/**
       SPRING_CLOUD_GATEWAY_ROUTES_1_FILTERS_0: StripPrefix=0
-      SPRING_CLOUD_GATEWAY_ROUTES_1_FILTERS_1: Tenant
-      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: trip-service
+      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: tenant-service
       SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://trip-service:8082
-      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/api/trips/**
+      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/api/tenants/**
       SPRING_CLOUD_GATEWAY_ROUTES_2_FILTERS_0: StripPrefix=0
-      SPRING_CLOUD_GATEWAY_ROUTES_2_FILTERS_1: Tenant
-      SPRING_CLOUD_GATEWAY_ROUTES_2_FILTERS_2: Auth
-      SPRING_CLOUD_GATEWAY_ROUTES_3_ID: ai-service
-      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://ai-service:8083
-      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/api/ai/**
+      SPRING_CLOUD_GATEWAY_ROUTES_3_ID: user-auth
+      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://user-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/api/auth/**
       SPRING_CLOUD_GATEWAY_ROUTES_3_FILTERS_0: StripPrefix=0
       SPRING_CLOUD_GATEWAY_ROUTES_3_FILTERS_1: Tenant
-      SPRING_CLOUD_GATEWAY_ROUTES_4_ID: super-admin
-      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://trip-service:8082
-      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/api/super/**
+      SPRING_CLOUD_GATEWAY_ROUTES_4_ID: user-profile
+      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://user-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/api/user/**
       SPRING_CLOUD_GATEWAY_ROUTES_4_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_4_FILTERS_1: Tenant
+      SPRING_CLOUD_GATEWAY_ROUTES_4_FILTERS_2: Auth
+      SPRING_CLOUD_GATEWAY_ROUTES_5_ID: trip-service
+      SPRING_CLOUD_GATEWAY_ROUTES_5_URI: http://trip-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: Path=/api/trips/**
+      SPRING_CLOUD_GATEWAY_ROUTES_5_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_5_FILTERS_1: Tenant
+      SPRING_CLOUD_GATEWAY_ROUTES_5_FILTERS_2: Auth
+      SPRING_CLOUD_GATEWAY_ROUTES_6_ID: ai-service
+      SPRING_CLOUD_GATEWAY_ROUTES_6_URI: http://ai-service:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_6_PREDICATES_0: Path=/api/ai/**
+      SPRING_CLOUD_GATEWAY_ROUTES_6_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_6_FILTERS_1: Tenant
+      SPRING_CLOUD_GATEWAY_ROUTES_7_ID: billing
+      SPRING_CLOUD_GATEWAY_ROUTES_7_URI: http://trip-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0: Path=/api/billing/**
+      SPRING_CLOUD_GATEWAY_ROUTES_7_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_7_FILTERS_1: Tenant
+      SPRING_CLOUD_GATEWAY_ROUTES_8_ID: super-admin
+      SPRING_CLOUD_GATEWAY_ROUTES_8_URI: http://trip-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_8_PREDICATES_0: Path=/api/super/**
+      SPRING_CLOUD_GATEWAY_ROUTES_8_FILTERS_0: StripPrefix=0
     depends_on:
       user-service:
         condition: service_started
@@ -200,6 +223,7 @@ services:
 volumes:
   postgres-data:
   trip-uploads:
+  user-avatars:
 
 networks:
   travel-network:

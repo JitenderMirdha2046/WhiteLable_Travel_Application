@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import tripService from '../services/tripService'
 import { Button } from '../components/ui/button'
 
+
 const travelTypes = [
   { id: 'Adventure', icon: '🏔️', desc: 'Thrills & outdoors' },
   { id: 'Relaxation', icon: '🏖️', desc: 'Peace & unwind' },

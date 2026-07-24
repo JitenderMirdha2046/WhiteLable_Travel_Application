@@ -67,6 +67,24 @@ class AdminService {
   getTenantId() {
     return localStorage.getItem('admin_tenant_id')
   }
+
+  async getUsers() {
+    const token = localStorage.getItem('admin_token')
+    const res = await fetch('/api/user/admin/users', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+    if (!res.ok) throw new Error('Failed to fetch users')
+    return res.json()
+  }
+
+  async deleteUser(userId) {
+    const token = localStorage.getItem('admin_token')
+    const res = await fetch(`/api/user/admin/${userId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+    if (!res.ok) throw new Error('Failed to delete user')
+  }
 }
 
 export default new AdminService()

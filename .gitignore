@@ -1,17 +1,20 @@
-# Java
+# Java / Maven
 target/
 *.jar
 *.war
 *.class
+*.iml
+dependency-reduced-pom.xml
 
-# Node
+# Node / Frontend
 node_modules/
 frontend/dist/
 frontend/.vite/
 
-# Env
+# Env / Secrets
 .env
 .env.local
+.env.production
 proxy.env
 
 # IDE
@@ -20,6 +23,10 @@ proxy.env
 *.swp
 *.swo
 *~
+*.iml
+.project
+.classpath
+.settings/
 
 # OS
 .DS_Store
@@ -29,6 +36,34 @@ Thumbs.db
 *.log
 logs/
 
-# Uploaded files
+# Docker Volumes (persistent data)
+docker/volumes/
+
+# Uploaded files (user avatars, logos, backgrounds)
 uploads/
-!trip-service/src/main/resources/static/uploads/
+user-avatars/
+trip-uploads/
+
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Flyway / DB
+*.sql.bak
+
+# Test reports
+test-results/
+coverage/
+.vitest/
+
+# Tool configs
+.opencode/
+.poolside/
+SESSION_SUMMARY.md
+ACHIEVEMENTS.md
+dns-resolv.conf
+HOW_TO_START.md
+
+# Root package (not needed)
+package.json
+package-lock.json

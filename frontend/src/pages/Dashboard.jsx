@@ -9,6 +9,7 @@ import { StatsSkeleton, CardSkeleton } from '../components/ui/skeleton'
 import { ErrorState } from '../components/ui/error-state'
 import { EmptyState } from '../components/ui/empty-state'
 
+
 export default function Dashboard() {
   const { user } = useAuth()
   const [trips, setTrips] = useState([])

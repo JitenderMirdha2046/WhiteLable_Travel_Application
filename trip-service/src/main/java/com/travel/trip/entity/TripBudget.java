@@ -12,6 +12,10 @@ public class TripBudget {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_id", nullable = false, insertable = false, updatable = false)
+    private Trip trip;
+
     @Column(name = "trip_id", nullable = false)
     private UUID tripId;
 

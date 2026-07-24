@@ -5,6 +5,25 @@ const TenantContext = createContext(null)
 export function TenantProvider({ children }) {
   const [tenant, setTenant] = useState({ id: null, subdomain: null, branding: null, loading: true })
 
+  const refreshBranding = async (tenantId) => {
+    try {
+      const { getBrandingByTenantId } = await import('../api/adminApi')
+      const res = await getBrandingByTenantId(tenantId)
+      setTenant((prev) => ({ ...prev, branding: res.data }))
+    } catch {}
+  }
+
+  useEffect(() => {
+    const handleBrandingUpdate = (e) => {
+      const detail = e.detail
+      if (detail?.tenantId || tenant.id) {
+        refreshBranding(detail?.tenantId || tenant.id)
+      }
+    }
+    window.addEventListener('branding-updated', handleBrandingUpdate)
+    return () => window.removeEventListener('branding-updated', handleBrandingUpdate)
+  }, [tenant.id])
+
   useEffect(() => {
     const detectTenant = async () => {
       const params = new URLSearchParams(window.location.search)

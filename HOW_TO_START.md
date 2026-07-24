@@ -178,7 +178,9 @@ User visits http://localhost:5173/
 | `/api/trips/**` | trip-service:8082 | Yes (JWT) |
 | `/api/super/**` | trip-service:8082 | No (login), Yes (rest) |
 | `/api/ai/**` | ai-service:8083 | No |
+| `/api/billing/**` | trip-service:8082 | Yes (admin token) |
 | `/uploads/**` | trip-service:8082 | No |
+| `/api/ai/weather**` | ai-service:8083 | No |
 
 ---
 
@@ -199,6 +201,27 @@ User visits http://localhost:5173/
 ---
 
 ## 7. Common Problems & Fixes
+
+### Problem: Gemini/Weather API calls fail from inside Docker (rootless Docker)
+**Root cause:** `host.docker.internal` doesn't resolve on Linux rootless Docker.
+
+**Fix:** The docker-compose.yml already includes `extra_hosts: - "host.docker.internal:host-gateway"` for the ai-service. Just run the API proxy on your host:
+
+```bash
+# Start the API proxy (handles both Gemini and Weather API calls)
+# This allows containers to reach external APIs through your host
+cd /home/jitender/Desktop/TravelProject
+source .env && python3 api-proxy.py 3090
+# Keep this running in a separate terminal
+
+# Then start the containers
+docker compose up -d
+```
+
+The proxy will:
+- Receive requests from ai-service at `host.docker.internal:3090`
+- Add your GEMINI_API_KEY or WEATHER_API_KEY from .env
+- Forward to the real APIs
 
 ### Problem: Frontend shows blank page or API calls fail
 **Check:** Is the API proxy working?
@@ -261,18 +284,25 @@ Before declaring "this feature is locked":
 # 1. Go to project
 cd /home/jitender/Desktop/TravelProject
 
-# 2. Start everything
+# 2. Start the API proxy (needed for rootless Docker to call external APIs)
+# This runs in the background - keep terminal open or use nohup
+source .env && nohup python3 api-proxy.py 3090 > proxy.log 2>&1 &
+
+# 3. Start everything
 docker compose up -d
 
-# 3. Wait 60 seconds for all services
+# 4. Wait 60 seconds for all services
 sleep 60
 
-# 4. Open browser
+# 5. Open browser
 echo "Open http://localhost:5173/ in your browser"
 echo "For tenant demo: http://localhost:5173/?tenant=manali"
 
-# 5. To see logs
+# 6. To see logs
 docker compose logs -f
+
+# 7. To stop the proxy when done
+pkill -f "api-proxy.py"
 ```
 
 ---
@@ -297,7 +327,38 @@ docker compose logs -f
 
 ---
 
-## 11. LOCKED — Frozen Feature State
+## 11. Environment Variables
+
+These go in `.env` at the project root:
+
+| Variable | Required | Default | Where Used | How to Get |
+|----------|----------|---------|------------|------------|
+| `GEMINI_API_KEY` | AI features | `placeholder-key` | ai-service → GeminiService | [Google AI Studio](https://makersuite.google.com/app/apikey) |
+| `STRIPE_SECRET_KEY` | Billing | `sk_test_placeholder` | trip-service → BillingService | [Stripe Dashboard](https://dashboard.stripe.com/apikeys) |
+| `STRIPE_WEBHOOK_SECRET` | Billing webhooks | `whsec_placeholder` | trip-service → BillingService | [Stripe Webhooks](https://dashboard.stripe.com/webhooks) |
+| `WEATHER_API_KEY` | Weather | `placeholder-key` | ai-service → WeatherService | [OpenWeatherMap](https://openweathermap.org/api) (free) |
+
+**Development mode:** All services work without any API keys — they fall back to mock data. To enable real APIs:
+
+```bash
+# Edit .env file
+echo "GEMINI_API_KEY=your_actual_key" >> .env
+echo "STRIPE_SECRET_KEY=sk_test_xxxx" >> .env
+echo "WEATHER_API_KEY=your_weather_key" >> .env
+
+# Then restart
+docker compose up -d
+```
+
+**Gemini API:** The ai-service already has `GEMINI_API_KEY` configured via env var. When you provide a real key, the fallback mock itineraries are replaced with AI-generated ones. No code changes needed.
+
+**Stripe:** When `STRIPE_SECRET_KEY` starts with `sk_test_` (valid key), dev mode turns off and real Stripe checkout sessions are created. Without it, subscription upgrades work in dev mode (immediate mock upgrade).
+
+**Weather:** OpenWeatherMap free tier gives real-time weather. The existing WeatherService maps Indian destinations (Goa, Manali, Ladakh → Leh, etc.) to their city names for accurate results.
+
+---
+
+## 12. LOCKED — Frozen Feature State
 
 As of July 3, 2026, this system is **LOCKED**. Do not modify these files without explicit approval:
 

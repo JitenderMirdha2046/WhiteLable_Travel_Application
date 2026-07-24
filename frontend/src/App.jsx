@@ -13,6 +13,7 @@ import MyTrips from './pages/MyTrips'
 import Profile from './pages/Profile'
 import TripComparison from './pages/TripComparison'
 import WhiteLabelDemo from './pages/WhiteLabelDemo'
+import PricingPage from './pages/PricingPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminOverview from './pages/admin/AdminOverview'
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/whitelabel-demo" element={<WhiteLabelDemo />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/pricing" element={<PricingPage />} />
         <Route element={<PrivateRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />

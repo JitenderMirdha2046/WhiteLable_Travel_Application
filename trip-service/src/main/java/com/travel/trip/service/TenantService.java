@@ -49,9 +49,10 @@ public class TenantService {
             throw new DuplicateResourceException("Email already registered");
         }
 
-        String subdomain = request.getSubdomain() != null
+        String rawSubdomain = request.getSubdomain() != null
                 ? request.getSubdomain()
                 : request.getAgencyName().toLowerCase().replaceAll("\\s+", "") + ".travelplanner.com";
+        String subdomain = rawSubdomain.toLowerCase();
 
         Tenant tenant = new Tenant();
         tenant.setName(request.getAgencyName());
@@ -92,7 +93,7 @@ public class TenantService {
     }
 
     public BrandingResponse getBrandingBySubdomain(String subdomain) {
-        Tenant tenant = tenantRepository.findBySubdomainIgnoreCase(subdomain)
+        Tenant tenant = tenantRepository.findBySubdomain(subdomain)
                 .orElseThrow(() -> new ResourceNotFoundException("Tenant not found"));
 
         return toBrandingResponse(tenant);

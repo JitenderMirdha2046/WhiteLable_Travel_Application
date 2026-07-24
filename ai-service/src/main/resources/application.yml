@@ -33,9 +33,9 @@ spring:
 gemini:
   api:
     key: ${GEMINI_API_KEY:placeholder-key}
-    url: ${GEMINI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent}
+    url: ${GEMINI_API_URL:http://host.docker.internal:3090/gemini}
 
 weather:
   api:
     key: ${WEATHER_API_KEY:placeholder-key}
-    url: ${WEATHER_API_URL:https://api.openweathermap.org/data/2.5}
+    url: ${WEATHER_API_URL:http://host.docker.internal:3090/weather}

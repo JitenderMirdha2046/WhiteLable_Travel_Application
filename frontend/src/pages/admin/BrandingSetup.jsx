@@ -94,7 +94,7 @@ export default function BrandingSetup() {
     setSaved(false)
     setSaving(true)
     try {
-      await adminService.updateBranding({
+      const result = await adminService.updateBranding({
         logoFile,
         existingLogoUrl,
         backgroundImage: backgroundImage || null,
@@ -105,7 +105,12 @@ export default function BrandingSetup() {
         accentColor,
         tagline,
       })
-      window.dispatchEvent(new CustomEvent('branding-updated'))
+      if (result.logoUrl && result.logoUrl !== existingLogoUrl) {
+        setLogoPreview(result.logoUrl)
+        setExistingLogoUrl(result.logoUrl)
+        setLogoFile(null)
+      }
+      window.dispatchEvent(new CustomEvent('branding-updated', { detail: result }))
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (err) {
