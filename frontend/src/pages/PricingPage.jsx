@@ -80,7 +80,7 @@ export default function PricingPage() {
                 className={`card p-8 relative ${plan.popular ? 'border-primary-500/40 ring-1 ring-primary-500/20' : ''}`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full text-xs font-medium text-white whitespace-nowrap">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary-500 rounded-full text-xs font-medium text-white whitespace-nowrap">
                     Most Popular
                   </div>
                 )}

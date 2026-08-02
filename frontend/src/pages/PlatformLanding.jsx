@@ -99,15 +99,15 @@ export default function PlatformLanding() {
     <div className="min-h-screen bg-surface">
       {/* Floating Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/6 w-72 h-72 bg-primary-500/10 rounded-full blur-[120px] animate-pulse-soft" />
-        <div className="absolute bottom-1/3 right-1/6 w-96 h-96 bg-accent-500/8 rounded-full blur-[120px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-2/3 left-1/3 w-48 h-48 bg-emerald-500/6 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/4 left-1/6 w-72 h-72 bg-white/5 rounded-full blur-[120px] animate-pulse-soft" />
+        <div className="absolute bottom-1/3 right-1/6 w-96 h-96 bg-white/5 rounded-full blur-[120px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-2/3 left-1/3 w-48 h-48 bg-white/5 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-xl flex items-center justify-center">
             <FiCompass className="w-5 h-5 text-white" />
           </div>
           <span className="text-xl font-bold gradient-text">TravelProject</span>
@@ -148,7 +148,7 @@ export default function PlatformLanding() {
               custom branding, customer management, and smart trip planning.
             </p>
             <div className="flex items-center gap-4 flex-wrap">
-              <button onClick={() => setShowForm(true)} className="btn-primary text-lg px-8 py-4 flex items-center gap-2 group shadow-lg shadow-primary-500/20">
+              <button onClick={() => setShowForm(true)} className="btn-primary text-lg px-8 py-4 flex items-center gap-2 group shadow-lg shadow-black/20">
                 Start Your Agency Free <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <a href="#features" className="btn-secondary text-lg px-8 py-4">
@@ -167,7 +167,7 @@ export default function PlatformLanding() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative"
           >
-            <div className="absolute -inset-4 bg-gradient-to-r from-primary-500/20 to-accent-500/20 rounded-2xl blur-2xl" />
+            <div className="absolute -inset-4 bg-white/5 rounded-2xl blur-2xl" />
             <div className="relative glass-strong rounded-2xl p-6 border border-primary-500/20">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-3 h-3 rounded-full bg-red-500" />
@@ -178,7 +178,7 @@ export default function PlatformLanding() {
               <div className="bg-surface rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-surface-lighter border border-surface-border-light text-primary-400 flex items-center justify-center">
                       <FiCompass className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-sm font-bold gradient-text">Manali Travels</span>
@@ -192,9 +192,9 @@ export default function PlatformLanding() {
                 <div className="h-2 bg-surface-border rounded-full w-1/2" />
                 <div className="h-2 bg-surface-border rounded-full w-2/3" />
                 <div className="flex gap-2 mt-2">
-                  <div className="h-20 w-16 bg-gradient-to-b from-primary-500/30 to-accent-500/30 rounded-lg flex-1" />
-                  <div className="h-20 w-16 bg-gradient-to-b from-primary-500/20 to-accent-500/20 rounded-lg flex-1" />
-                  <div className="h-20 w-16 bg-gradient-to-b from-primary-500/30 to-accent-500/30 rounded-lg flex-1" />
+                  <div className="h-20 w-16 bg-surface-border-light rounded-lg flex-1" />
+                  <div className="h-20 w-16 bg-surface-border rounded-lg flex-1" />
+                  <div className="h-20 w-16 bg-surface-border-light rounded-lg flex-1" />
                 </div>
               </div>
             </div>
@@ -251,7 +251,7 @@ export default function PlatformLanding() {
               transition={{ delay: i * 0.1 }}
               className="card p-6 hover:border-primary-500/30 transition-colors"
             >
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500/20 to-accent-500/20 flex items-center justify-center mb-4">
+              <div className="w-10 h-10 rounded-lg bg-surface-lighter border border-surface-border-light text-primary-400 flex items-center justify-center mb-4">
                 <feat.icon className="w-5 h-5 text-primary-400" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">{feat.title}</h3>
@@ -284,14 +284,14 @@ export default function PlatformLanding() {
             </div>
             <div className="bg-surface rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="h-4 w-32 bg-gradient-to-r from-primary-500/40 to-accent-500/40 rounded" />
+                <div className="h-4 w-32 bg-surface-border-light rounded" />
                 <div className="h-4 w-20 bg-surface-border rounded" />
               </div>
               <div className="grid grid-cols-4 gap-3">
                 {['Users', 'Trips', 'Revenue', 'AI Gen'].map((label) => (
                   <div key={label} className="bg-surface-border/30 rounded-lg p-3">
                     <div className="h-3 w-12 bg-surface-border rounded mb-2" />
-                    <div className="h-6 w-16 bg-gradient-to-r from-primary-500/30 to-accent-500/30 rounded" />
+                    <div className="h-6 w-16 bg-surface-border-light rounded" />
                   </div>
                 ))}
               </div>
@@ -314,7 +314,7 @@ export default function PlatformLanding() {
               <span className="text-xs text-gray-500 ml-2">Branding Setup</span>
             </div>
             <div className="bg-surface rounded-xl p-4 space-y-3">
-              <div className="h-4 w-40 bg-gradient-to-r from-primary-500/40 to-accent-500/40 rounded" />
+              <div className="h-4 w-40 bg-surface-border-light rounded" />
               <div className="space-y-2">
                 <div className="h-3 w-full bg-surface-border rounded" />
                 <div className="h-8 w-full bg-surface-border/50 rounded-lg border border-surface-border" />
@@ -350,7 +350,7 @@ export default function PlatformLanding() {
               className={`card p-8 relative ${plan.popular ? 'border-primary-500/40 ring-1 ring-primary-500/20' : ''}`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full text-xs font-medium text-white">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary-500 rounded-full text-xs font-medium text-white">
                   Most Popular
                 </div>
               )}
@@ -520,10 +520,10 @@ export default function PlatformLanding() {
           viewport={{ once: true }}
           className="relative"
         >
-          <div className="absolute -inset-10 bg-gradient-to-r from-primary-500/10 to-accent-500/10 rounded-[3rem] blur-3xl" />
+          <div className="absolute -inset-10 bg-white/5 rounded-[3rem] blur-3xl" />
           <div className="relative glass-strong rounded-3xl p-12 md:p-20 text-center border-primary-500/20 overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
             <div className="relative">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 text-shadow">
                 Ready to Launch Your<br />
@@ -532,7 +532,7 @@ export default function PlatformLanding() {
               <p className="text-gray-400 mb-8 max-w-lg mx-auto text-lg">
                 Join agencies using TravelProject to power their travel business. Start your free trial today.
               </p>
-              <button onClick={() => setShowForm(true)} className="btn-primary text-lg px-10 py-4 inline-flex items-center gap-2 group shadow-lg shadow-primary-500/20">
+              <button onClick={() => setShowForm(true)} className="btn-primary text-lg px-10 py-4 inline-flex items-center gap-2 group shadow-lg shadow-black/20">
                 Start Free Trial <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>

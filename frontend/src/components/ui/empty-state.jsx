@@ -13,7 +13,7 @@ export function EmptyState({
       animate={{ opacity: 1, y: 0 }}
       className="card text-center py-16"
     >
-      <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-2xl flex items-center justify-center">
+      <div className="w-16 h-16 mx-auto mb-4 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-2xl flex items-center justify-center">
         <Icon className="w-8 h-8 text-primary-400" />
       </div>
       <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>

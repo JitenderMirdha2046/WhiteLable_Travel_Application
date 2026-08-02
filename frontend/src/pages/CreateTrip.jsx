@@ -195,7 +195,7 @@ export default function CreateTrip() {
         {step === 1 && (
           <motion.div key="s1" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
             <div className="card mb-4">
-              <div className="w-14 h-14 mb-5 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 mb-5 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-2xl flex items-center justify-center">
                 <FiMapPin className="w-7 h-7 text-primary-400" />
               </div>
               <h2 className="text-2xl font-semibold text-white mb-2">Where do you want to go?</h2>
@@ -253,7 +253,7 @@ export default function CreateTrip() {
         {step === 2 && (
           <motion.div key="s2" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
             <div className="card mb-4">
-              <div className="w-14 h-14 mb-5 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 mb-5 bg-surface-lighter border border-surface-border-light text-emerald-400 rounded-2xl flex items-center justify-center">
                 <RupeeIcon className="w-7 h-7 text-emerald-400" />
               </div>
               <h2 className="text-2xl font-semibold text-white mb-2">Budget & Duration</h2>
@@ -346,7 +346,7 @@ export default function CreateTrip() {
 
         {step === 3 && (
           <motion.div key="s3" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="card">
-            <div className="w-14 h-14 mb-5 bg-gradient-to-br from-accent-500/20 to-orange-500/20 rounded-2xl flex items-center justify-center">
+            <div className="w-14 h-14 mb-5 bg-surface-lighter border border-surface-border-light text-accent-400 rounded-2xl flex items-center justify-center">
               <FiTag className="w-7 h-7 text-accent-400" />
             </div>
             <h2 className="text-2xl font-semibold text-white mb-2">What's your travel style?</h2>

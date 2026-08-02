@@ -24,7 +24,7 @@ export default function Sidebar({ isOpen, onClose }) {
           {logoUrl ? (
             <img src={logoUrl} alt={agencyName} className="h-9 w-auto" />
           ) : (
-            <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-xl flex items-center justify-center">
               <FiCompass className="w-5 h-5 text-white" />
             </div>
           )}

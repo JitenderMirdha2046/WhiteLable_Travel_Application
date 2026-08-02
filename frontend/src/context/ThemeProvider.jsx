@@ -21,11 +21,14 @@ function adjust(hex, amt) {
 function getCss(p, a, dk) {
   return `
 [class*="btn-primary"] {
-  background-image: linear-gradient(to right, ${dk}, ${p}) !important;
+  background-color: ${p} !important;
+  background-image: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
 }
 [class*="btn-primary"]:hover {
-  background-image: linear-gradient(to right, ${p}, ${adjust(p, 30)}) !important;
-  box-shadow: 0 10px 15px -3px ${p}40 !important;
+  background-color: ${dk} !important;
+  background-image: none !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
 }
 .btn-secondary:hover {
   border-color: ${p}80 !important;
@@ -41,20 +44,6 @@ function getCss(p, a, dk) {
 [class*="border-primary-500"] { border-color: ${p} !important; }
 [class*="border-primary-500/"] { border-color: color-mix(in srgb, ${p} 50%, transparent) !important; }
 [class*="hover:border-primary-500"]:hover { border-color: ${p} !important; }
-[class*="from-primary-400"] { --tw-gradient-from: ${p} !important; }
-[class*="from-primary-500"] { --tw-gradient-from: ${p} !important; }
-[class*="from-primary-600"] { --tw-gradient-from: ${dk} !important; }
-[class*="from-primary-900"] { --tw-gradient-from: ${adjust(p, -120)} !important; }
-[class*="to-primary-400"] { --tw-gradient-to: ${p} !important; }
-[class*="to-primary-500"] { --tw-gradient-to: ${p} !important; }
-[class*="to-primary-600"] { --tw-gradient-to: ${dk} !important; }
-[class*="hover:from-primary-400"]:hover { --tw-gradient-from: ${p} !important; }
-[class*="hover:from-primary-500"]:hover { --tw-gradient-from: ${p} !important; }
-[class*="hover:to-primary-400"]:hover { --tw-gradient-to: ${p} !important; }
-[class*="hover:shadow-primary-500"]:hover { --tw-shadow-color: ${p} !important; }
-[class*="hover:shadow-primary-500/"]:hover { --tw-shadow-color: color-mix(in srgb, ${p} 25%, transparent) !important; }
-.group:hover [class*="group-hover:from-primary-500"] { --tw-gradient-from: ${p} !important; }
-[class*="ring-primary-500/"] { --tw-ring-color: color-mix(in srgb, ${p} 30%, transparent) !important; }
 
 [class*="text-accent-400"] { color: ${a} !important; }
 [class*="text-accent-500"] { color: ${a} !important; }

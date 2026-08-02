@@ -75,7 +75,7 @@ export default function SuperDashboard() {
                 <p className="text-sm text-gray-400">{card.label}</p>
                 <p className="text-2xl font-bold mt-1">{card.value}</p>
               </div>
-              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center shadow-lg`}>
+              <div className={`w-10 h-10 rounded-lg bg-surface-lighter border border-surface-border-light flex items-center justify-center`}>
                 <card.icon className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function SuperDashboard() {
                   className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-surface-border/30 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500/20 to-accent-500/20 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-surface-lighter border border-surface-border-light text-primary-400 flex items-center justify-center">
                       <FiShield className="w-4 h-4 text-primary-400" />
                     </div>
                     <div>

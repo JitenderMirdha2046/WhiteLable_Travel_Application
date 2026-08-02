@@ -64,9 +64,9 @@ export default function LandingPage() {
         <>
           {/* Animated Background */}
           <div className="fixed inset-0 pointer-events-none">
-            <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-primary-500/10 rounded-full blur-[120px]" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[35%] h-[35%] bg-accent-500/10 rounded-full blur-[120px]" />
-            <div className="absolute top-[40%] right-[20%] w-[25%] h-[25%] bg-emerald-500/8 rounded-full blur-[100px]" />
+            <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-white/5 rounded-full blur-[120px]" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[35%] h-[35%] bg-white/5 rounded-full blur-[120px]" />
+            <div className="absolute top-[40%] right-[20%] w-[25%] h-[25%] bg-white/5 rounded-full blur-[100px]" />
             {[...Array(20)].map((_, i) => (
               <motion.div
                 key={i}
@@ -90,9 +90,9 @@ export default function LandingPage() {
 
           {/* Floating Orbs */}
           <div className="fixed inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-1/4 left-1/6 w-72 h-72 bg-primary-500/10 rounded-full blur-[120px] animate-pulse-soft" />
-            <div className="absolute bottom-1/3 right-1/6 w-96 h-96 bg-accent-500/8 rounded-full blur-[120px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
-            <div className="absolute top-2/3 left-1/3 w-48 h-48 bg-emerald-500/6 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-1/4 left-1/6 w-72 h-72 bg-white/5 rounded-full blur-[120px] animate-pulse-soft" />
+            <div className="absolute bottom-1/3 right-1/6 w-96 h-96 bg-white/5 rounded-full blur-[120px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-2/3 left-1/3 w-48 h-48 bg-white/5 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '2s' }} />
           </div>
         </>
       )}
@@ -103,7 +103,7 @@ export default function LandingPage() {
           {logoUrl ? (
             <img src={logoUrl} alt={agencyName} className="h-10 w-auto" />
           ) : (
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-xl flex items-center justify-center">
               <FiCompass className="w-5 h-5 text-white" />
             </div>
           )}
@@ -124,7 +124,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-sm text-primary-300 mb-6 border-primary-500/20 animate-glow"
+              className="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-sm text-primary-300 mb-6 border-primary-500/20"
             >
               <FiStar className="w-4 h-4 text-accent-400" />
               AI-Powered Travel Planning
@@ -199,7 +199,7 @@ export default function LandingPage() {
             className="relative hidden lg:block"
           >
             <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary-500/20 to-accent-500/20 rounded-[2rem] blur-3xl opacity-50 animate-glow-lg" />
+              <div className="absolute -inset-4 bg-white/5 rounded-[2rem] blur-3xl" />
               <motion.div
                 animate={{ y: [0, -15, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
@@ -215,7 +215,7 @@ export default function LandingPage() {
                     whileHover={{ x: 5 }}
                     className="flex items-center gap-4 p-4 bg-surface-lighter/80 rounded-xl hover:bg-surface-lighter transition-colors cursor-default"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-xl flex items-center justify-center">
                       <FiMapPin className="w-6 h-6 text-primary-400" />
                     </div>
                     <div>
@@ -227,7 +227,7 @@ export default function LandingPage() {
                     whileHover={{ x: 5 }}
                     className="flex items-center gap-4 p-4 bg-surface-lighter/80 rounded-xl hover:bg-surface-lighter transition-colors cursor-default"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-surface-lighter border border-surface-border-light text-emerald-400 rounded-xl flex items-center justify-center">
                       <FiCalendar className="w-6 h-6 text-emerald-400" />
                     </div>
                     <div>
@@ -239,7 +239,7 @@ export default function LandingPage() {
                     whileHover={{ x: 5 }}
                     className="flex items-center gap-4 p-4 bg-surface-lighter/80 rounded-xl hover:bg-surface-lighter transition-colors cursor-default"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-accent-500/20 to-orange-500/20 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-surface-lighter border border-surface-border-light text-accent-400 rounded-xl flex items-center justify-center">
                       <RupeeIcon className="w-6 h-6 text-accent-400" />
                     </div>
                     <div>
@@ -275,10 +275,10 @@ export default function LandingPage() {
               transition={{ delay: i * 0.1 }}
               className="card card-hover group card-lift"
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:from-primary-500/30 group-hover:to-accent-500/30 transition-all duration-300">
+              <div className="w-14 h-14 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-300">
                 <feat.icon className="w-7 h-7 text-primary-400 group-hover:text-primary-300 transition-colors" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary-400 group-hover:to-accent-400 transition-all duration-300">{feat.title}</h3>
+              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-primary-300 transition-colors duration-300">{feat.title}</h3>
               <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{feat.desc}</p>
             </motion.div>
           ))}
@@ -308,7 +308,7 @@ export default function LandingPage() {
                 whileHover={{ y: -8, scale: 1.02 }}
                 className="card overflow-hidden group cursor-pointer card-lift border-primary-500/0 hover:border-primary-500/30"
               >
-                <div className={`h-36 -mx-6 -mt-6 mb-4 bg-gradient-to-br ${dest.color} opacity-80 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110`} />
+                <div className={`h-36 -mx-6 -mt-6 mb-4 bg-gradient-to-br from-surface-lighter to-surface-border-light group-hover:from-surface-border group-hover:to-surface-border-light transition-all duration-500 group-hover:scale-110`} />
                 <h3 className="text-xl font-semibold text-white group-hover:gradient-text transition-all duration-300">{dest.name}</h3>
                 <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{dest.desc}</p>
               </motion.div>
@@ -344,10 +344,10 @@ export default function LandingPage() {
           viewport={{ once: true }}
           className="relative"
         >
-          <div className="absolute -inset-10 bg-gradient-to-r from-primary-500/10 to-accent-500/10 rounded-[3rem] blur-3xl" />
+          <div className="absolute -inset-10 bg-white/5 rounded-[3rem] blur-3xl" />
           <div className="relative glass-strong rounded-3xl p-12 md:p-20 text-center border-primary-500/20 overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
             <div className="relative">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 text-shadow">
                 Ready to Plan Your<br />

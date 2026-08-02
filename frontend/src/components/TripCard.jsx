@@ -16,7 +16,7 @@ export default function TripCard({ trip, onClick, onDelete }) {
       className="card card-hover group"
     >
       <div className="flex items-start justify-between mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-xl flex items-center justify-center">
           <FiMapPin className="w-6 h-6 text-primary-400" />
         </div>
         <button

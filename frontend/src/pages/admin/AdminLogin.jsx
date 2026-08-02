@@ -29,8 +29,8 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/6 w-72 h-72 bg-primary-500/10 rounded-full blur-[120px] animate-pulse-soft" />
-        <div className="absolute bottom-1/3 right-1/6 w-96 h-96 bg-accent-500/8 rounded-full blur-[120px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/4 left-1/6 w-72 h-72 bg-white/5 rounded-full blur-[120px] animate-pulse-soft" />
+        <div className="absolute bottom-1/3 right-1/6 w-96 h-96 bg-white/5 rounded-full blur-[120px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
       </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -39,7 +39,7 @@ export default function AdminLogin() {
       >
         <div className="card p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-500/20">
+            <div className="w-16 h-16 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-black/20">
               <FiLock className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold">Agency Admin</h1>

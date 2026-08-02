@@ -127,7 +127,7 @@ export default function BillingPage() {
                   className={`card p-6 relative ${plan.popular ? 'border-primary-500/50 ring-1 ring-primary-500/20' : ''}`}
                 >
                   {plan.popular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs bg-gradient-to-r from-primary-500 to-accent-500 text-white px-3 py-1 rounded-full whitespace-nowrap">
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs bg-primary-500 text-white px-3 py-1 rounded-full whitespace-nowrap">
                       Most Popular
                     </span>
                   )}
@@ -162,7 +162,7 @@ export default function BillingPage() {
                       disabled={upgrading === plan.name}
                       className={`w-full py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
                         plan.popular
-                          ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:shadow-lg hover:shadow-primary-500/20'
+                          ? 'bg-primary-500 text-white hover:bg-primary-600 hover:shadow-lg hover:shadow-black/20'
                           : 'border border-surface-border hover:border-gray-500 text-gray-300'
                       } ${upgrading === plan.name ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >

@@ -2,12 +2,12 @@ import { forwardRef } from 'react'
 import { motion } from 'framer-motion'
 
 const variants = {
-  primary: 'bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white shadow-lg shadow-primary-500/25',
+  primary: 'bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-black/20',
   secondary: 'bg-surface-lighter border border-surface-border-light hover:border-primary-500/50 hover:bg-surface-lighter/80 text-gray-200',
   outline: 'border border-surface-border-light bg-transparent hover:border-primary-500/50 text-gray-300 hover:text-white',
   ghost: 'text-gray-400 hover:text-white hover:bg-surface-lighter',
   danger: 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:text-red-300',
-  'danger-solid': 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white shadow-lg shadow-red-500/25',
+  'danger-solid': 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-black/20',
 }
 
 const sizes = {

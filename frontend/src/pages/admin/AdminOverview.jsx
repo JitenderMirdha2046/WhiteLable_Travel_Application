@@ -80,10 +80,10 @@ export default function AdminOverview() {
   }
 
   const statCards = [
-    { label: 'Total Users', value: formatNumber(users.length), icon: FiUsers, color: 'from-blue-500 to-blue-600' },
-    { label: 'Total Trips', value: formatNumber(stats.totalTrips), icon: FiMap, color: 'from-emerald-500 to-emerald-600' },
-    { label: 'AI Itineraries', value: formatNumber(stats.aiGenerations), icon: FiTrendingUp, color: 'from-purple-500 to-purple-600' },
-    { label: 'Trip Value', value: formatCurrency(stats.totalRevenue), icon: RupeeIcon, color: 'from-amber-500 to-amber-600' },
+    { label: 'Total Users', value: formatNumber(users.length), icon: FiUsers, iconColor: 'text-blue-400' },
+    { label: 'Total Trips', value: formatNumber(stats.totalTrips), icon: FiMap, iconColor: 'text-emerald-400' },
+    { label: 'AI Itineraries', value: formatNumber(stats.aiGenerations), icon: FiTrendingUp, iconColor: 'text-purple-400' },
+    { label: 'Trip Value', value: formatCurrency(stats.totalRevenue), icon: RupeeIcon, iconColor: 'text-amber-400' },
   ]
 
   const copyUrl = () => {
@@ -105,7 +105,7 @@ export default function AdminOverview() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card p-5 border-primary-500/20 bg-gradient-to-r from-primary-500/5 to-accent-500/5"
+        className="card p-5 border-primary-500/20"
       >
         <h2 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
           <FiGlobe className="w-4 h-4 text-primary-400" />
@@ -184,8 +184,8 @@ export default function AdminOverview() {
                     <p className="text-sm text-gray-400">{stat.label}</p>
                     <p className="text-2xl font-bold mt-1">{stat.value}</p>
                   </div>
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
-                    <stat.icon className="w-5 h-5 text-white" />
+                  <div className={`w-10 h-10 rounded-lg bg-surface-lighter border border-surface-border-light flex items-center justify-center`}>
+                    <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
                   </div>
                 </div>
               </motion.div>
@@ -210,7 +210,7 @@ export default function AdminOverview() {
                       <div className="flex items-center gap-2 flex-1 mx-4">
                         <div className="h-2 bg-surface-border rounded-full flex-1 overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full"
+                            className="h-full bg-primary-500 rounded-full"
                             style={{ width: `${Math.max(6, (Number(d.count) / maxPopularCount) * 100)}%` }}
                           />
                         </div>

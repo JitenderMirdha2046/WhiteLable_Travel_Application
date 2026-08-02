@@ -43,7 +43,7 @@ export default function SuperAdminLayout() {
       <aside className={`fixed top-0 left-0 z-50 h-full w-64 bg-surface border-r border-surface-border transform transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between h-16 px-4 border-b border-surface-border">
           <Link to="/super-admin/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-lg flex items-center justify-center">
               <FiShield className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -96,7 +96,7 @@ export default function SuperAdminLayout() {
               <FiMenu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xs font-bold text-white">
+              <div className="w-7 h-7 rounded-full bg-surface-lighter border border-surface-border-light text-primary-400 flex items-center justify-center text-xs font-bold text-white">
                 {adminName.charAt(0)}
               </div>
               <span className="text-sm text-gray-400">{adminName}</span>

@@ -125,7 +125,7 @@ export default function Profile() {
           <CardHeader>
             <div className="flex items-center gap-4">
               <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
-                <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center overflow-hidden">
+                <div className="w-20 h-20 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-2xl flex items-center justify-center overflow-hidden">
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (

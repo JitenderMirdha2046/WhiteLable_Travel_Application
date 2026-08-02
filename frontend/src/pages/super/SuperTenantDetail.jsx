@@ -87,7 +87,7 @@ export default function SuperTenantDetail() {
 
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500/20 to-accent-500/20 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-xl bg-surface-lighter border border-surface-border-light text-primary-400 flex items-center justify-center">
             <FiShield className="w-7 h-7 text-primary-400" />
           </div>
           <div>

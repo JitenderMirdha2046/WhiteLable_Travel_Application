@@ -9,7 +9,7 @@ export default function LoadingSpinner({ fullScreen, text }) {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-            className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center"
+            className="w-12 h-12 mx-auto mb-4 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-2xl flex items-center justify-center"
           >
             <FiCompass className="w-6 h-6 text-white" />
           </motion.div>

@@ -150,7 +150,7 @@ export default function SuperTenants() {
                   >
                     <td className="py-3 px-4">
                       <Link to={`/super-admin/tenants/${t.id}`} className="flex items-center gap-3 hover:text-primary-400 transition-colors">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500/20 to-accent-500/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-surface-lighter border border-surface-border-light text-primary-400 flex items-center justify-center">
                           <FiShield className="w-4 h-4 text-primary-400" />
                         </div>
                         <div>

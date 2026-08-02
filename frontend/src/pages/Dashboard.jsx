@@ -151,7 +151,7 @@ export default function Dashboard() {
               className="card"
             >
               <div className="flex items-center justify-between mb-3">
-                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                <div className={`w-11 h-11 rounded-xl bg-surface-lighter border border-surface-border-light flex items-center justify-center`}>
                   <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
                 </div>
                 <motion.span

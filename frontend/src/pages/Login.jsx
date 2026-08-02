@@ -66,8 +66,8 @@ export default function Login() {
       )}
       {!backgroundImage && (
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-1/4 left-1/6 w-72 h-72 bg-primary-500/10 rounded-full blur-[120px] animate-pulse-soft" />
-          <div className="absolute bottom-1/3 right-1/6 w-96 h-96 bg-accent-500/8 rounded-full blur-[120px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/4 left-1/6 w-72 h-72 bg-white/5 rounded-full blur-[120px] animate-pulse-soft" />
+          <div className="absolute bottom-1/3 right-1/6 w-96 h-96 bg-white/5 rounded-full blur-[120px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
         </div>
       )}
       {/* Left - Form */}
@@ -79,7 +79,7 @@ export default function Login() {
         >
           <div className="glass rounded-2xl p-8 border border-surface-border">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-xl flex items-center justify-center">
               <FiCompass className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold gradient-text">{agencyName || 'TravelPlanner'}</span>
@@ -176,10 +176,10 @@ export default function Login() {
       </div>
 
       {/* Right - Visual */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary-900/40 to-surface items-center justify-center p-8 relative overflow-hidden">
+      <div className="hidden lg:flex flex-1 bg-black/30 border-l border-surface-border items-center justify-center p-8 relative overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary-500/20 rounded-full blur-[100px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent-500/20 rounded-full blur-[100px]" />
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/5 rounded-full blur-[100px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-[100px]" />
         </div>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -188,7 +188,7 @@ export default function Login() {
           className="relative text-center"
         >
           <div className="glass rounded-3xl p-10 max-w-sm border-primary-500/20">
-            <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-6 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-2xl flex items-center justify-center">
               <FiCompass className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">AI Travel Planning</h3>

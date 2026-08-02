@@ -31,7 +31,7 @@ export default function Navbar({ onMenuClick }) {
             {logoUrl ? (
               <img src={logoUrl} alt={agencyName} className="h-8 w-auto" />
             ) : (
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-lg flex items-center justify-center">
                 <FiCompass className="w-4 h-4 text-white" />
               </div>
             )}
@@ -44,7 +44,7 @@ export default function Navbar({ onMenuClick }) {
             onClick={() => setProfileOpen(!profileOpen)}
             className="flex items-center gap-3 btn-ghost rounded-full pr-2"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden">
+            <div className="w-8 h-8 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden">
               {user?.avatarUrl ? (
                 <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (
