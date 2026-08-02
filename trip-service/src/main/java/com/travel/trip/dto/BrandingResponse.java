@@ -1,5 +1,6 @@
 package com.travel.trip.dto;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public class BrandingResponse {
@@ -16,8 +17,8 @@ public class BrandingResponse {
     private String tagline;
     private String subdomain;
     private Integer orbIntensity;
-    private Double latitude;
-    private Double longitude;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
     private String phone;
     private String address;
 
@@ -26,7 +27,7 @@ public class BrandingResponse {
                             String templateStyle,
                             String primaryColor, String accentColor,
                             String tagline, String subdomain, Integer orbIntensity,
-                            Double latitude, Double longitude, String phone, String address) {
+                            BigDecimal latitude, BigDecimal longitude, String phone, String address) {
         this.tenantId = tenantId;
         this.agencyName = agencyName;
         this.logoUrl = logoUrl;
@@ -57,8 +58,8 @@ public class BrandingResponse {
     public String getTagline() { return tagline; }
     public String getSubdomain() { return subdomain; }
     public Integer getOrbIntensity() { return orbIntensity; }
-    public Double getLatitude() { return latitude; }
-    public Double getLongitude() { return longitude; }
+    public BigDecimal getLatitude() { return latitude; }
+    public BigDecimal getLongitude() { return longitude; }
     public String getPhone() { return phone; }
     public String getAddress() { return address; }
 }

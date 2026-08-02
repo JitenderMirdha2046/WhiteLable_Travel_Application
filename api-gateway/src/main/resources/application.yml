@@ -69,6 +69,27 @@ spring:
             - StripPrefix=0
             - Tenant
 
+        - id: user-service-api-docs
+          uri: http://localhost:8081
+          predicates:
+            - Path=/user-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: trip-service-api-docs
+          uri: http://localhost:8082
+          predicates:
+            - Path=/trip-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: ai-service-api-docs
+          uri: http://localhost:8083
+          predicates:
+            - Path=/ai-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin
 
@@ -78,3 +99,16 @@ spring:
 app:
   jwt:
     secret: 5267556B58703273357638792F423F4528482B4D6251655368566D5971337436
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: User Service
+        url: /user-service/v3/api-docs
+      - name: Trip Service
+        url: /trip-service/v3/api-docs
+      - name: AI Service
+        url: /ai-service/v3/api-docs

@@ -200,6 +200,26 @@ services:
       SPRING_CLOUD_GATEWAY_ROUTES_8_URI: http://trip-service:8082
       SPRING_CLOUD_GATEWAY_ROUTES_8_PREDICATES_0: Path=/api/super/**
       SPRING_CLOUD_GATEWAY_ROUTES_8_FILTERS_0: StripPrefix=0
+      SPRING_CLOUD_GATEWAY_ROUTES_9_ID: user-service-api-docs
+      SPRING_CLOUD_GATEWAY_ROUTES_9_URI: http://user-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_9_PREDICATES_0: Path=/user-service/v3/api-docs/**
+      SPRING_CLOUD_GATEWAY_ROUTES_9_FILTERS_0: StripPrefix=1
+      SPRING_CLOUD_GATEWAY_ROUTES_10_ID: trip-service-api-docs
+      SPRING_CLOUD_GATEWAY_ROUTES_10_URI: http://trip-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_10_PREDICATES_0: Path=/trip-service/v3/api-docs/**
+      SPRING_CLOUD_GATEWAY_ROUTES_10_FILTERS_0: StripPrefix=1
+      SPRING_CLOUD_GATEWAY_ROUTES_11_ID: ai-service-api-docs
+      SPRING_CLOUD_GATEWAY_ROUTES_11_URI: http://ai-service:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_11_PREDICATES_0: Path=/ai-service/v3/api-docs/**
+      SPRING_CLOUD_GATEWAY_ROUTES_11_FILTERS_0: StripPrefix=1
+      SPRINGDOC_API_DOCS_ENABLED: "true"
+      SPRINGDOC_SWAGGER_UI_PATH: /swagger-ui.html
+      SPRINGDOC_SWAGGER_UI_URLS_0_NAME: User Service
+      SPRINGDOC_SWAGGER_UI_URLS_0_URL: /user-service/v3/api-docs
+      SPRINGDOC_SWAGGER_UI_URLS_1_NAME: Trip Service
+      SPRINGDOC_SWAGGER_UI_URLS_1_URL: /trip-service/v3/api-docs
+      SPRINGDOC_SWAGGER_UI_URLS_2_NAME: AI Service
+      SPRINGDOC_SWAGGER_UI_URLS_2_URL: /ai-service/v3/api-docs
     depends_on:
       user-service:
         condition: service_started

@@ -44,3 +44,37 @@ spring:
             - Path=/api/ai/**
           filters:
             - StripPrefix=0
+
+        - id: user-service-api-docs
+          uri: http://user-service:8081
+          predicates:
+            - Path=/user-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: trip-service-api-docs
+          uri: http://trip-service:8082
+          predicates:
+            - Path=/trip-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: ai-service-api-docs
+          uri: http://ai-service:8083
+          predicates:
+            - Path=/ai-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: User Service
+        url: /user-service/v3/api-docs
+      - name: Trip Service
+        url: /trip-service/v3/api-docs
+      - name: AI Service
+        url: /ai-service/v3/api-docs

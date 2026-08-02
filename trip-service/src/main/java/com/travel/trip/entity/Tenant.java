@@ -1,6 +1,7 @@
 package com.travel.trip.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -76,10 +77,10 @@ public class Tenant {
     private LocalDateTime subscriptionEndsAt;
 
     @Column(precision = 10, scale = 7)
-    private Double latitude;
+    private BigDecimal latitude;
 
     @Column(precision = 10, scale = 7)
-    private Double longitude;
+    private BigDecimal longitude;
 
     @Column(length = 20)
     private String phone;
@@ -147,10 +148,10 @@ public class Tenant {
     public void setTrialEndsAt(LocalDateTime trialEndsAt) { this.trialEndsAt = trialEndsAt; }
     public LocalDateTime getSubscriptionEndsAt() { return subscriptionEndsAt; }
     public void setSubscriptionEndsAt(LocalDateTime subscriptionEndsAt) { this.subscriptionEndsAt = subscriptionEndsAt; }
-    public Double getLatitude() { return latitude; }
-    public void setLatitude(Double latitude) { this.latitude = latitude; }
-    public Double getLongitude() { return longitude; }
-    public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public BigDecimal getLatitude() { return latitude; }
+    public void setLatitude(BigDecimal latitude) { this.latitude = latitude; }
+    public BigDecimal getLongitude() { return longitude; }
+    public void setLongitude(BigDecimal longitude) { this.longitude = longitude; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
     public String getAddress() { return address; }
