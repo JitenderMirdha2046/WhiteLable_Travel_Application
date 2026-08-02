@@ -18,6 +18,7 @@ public class TripResponse {
     private Boolean cacheUsed;
     private BigDecimal totalEstimatedCost;
     private String itinerary;
+    private String selectedPlaces;
     private String status;
     private LocalDateTime createdAt;
     private TripBudgetDto budgetBreakdown;
@@ -67,6 +68,8 @@ public class TripResponse {
     public void setTotalEstimatedCost(BigDecimal totalEstimatedCost) { this.totalEstimatedCost = totalEstimatedCost; }
     public String getItinerary() { return itinerary; }
     public void setItinerary(String itinerary) { this.itinerary = itinerary; }
+    public String getSelectedPlaces() { return selectedPlaces; }
+    public void setSelectedPlaces(String selectedPlaces) { this.selectedPlaces = selectedPlaces; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }

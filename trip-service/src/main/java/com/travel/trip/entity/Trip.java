@@ -51,6 +51,9 @@ public class Trip {
     @Column(columnDefinition = "TEXT")
     private String itinerary;
 
+    @Column(name = "selected_places", columnDefinition = "TEXT")
+    private String selectedPlaces;
+
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TripBudget> budgets = new ArrayList<>();
 
@@ -93,6 +96,8 @@ public class Trip {
     public void setTotalEstimatedCost(BigDecimal totalEstimatedCost) { this.totalEstimatedCost = totalEstimatedCost; }
     public String getItinerary() { return itinerary; }
     public void setItinerary(String itinerary) { this.itinerary = itinerary; }
+    public String getSelectedPlaces() { return selectedPlaces; }
+    public void setSelectedPlaces(String selectedPlaces) { this.selectedPlaces = selectedPlaces; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }

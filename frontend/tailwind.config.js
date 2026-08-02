@@ -33,11 +33,11 @@ export default {
           900: 'var(--color-accent-900, #2c1f02)',
         },
         surface: {
-          DEFAULT: '#0a0f1e',
-          light: '#111827',
-          lighter: '#1a2332',
-          border: '#1e293b',
-          'border-light': '#334155',
+          DEFAULT: '#0f172a',
+          light: '#1a2332',
+          lighter: '#233045',
+          border: '#2d3a52',
+          'border-light': '#3d4a62',
         },
       },
       fontFamily: {

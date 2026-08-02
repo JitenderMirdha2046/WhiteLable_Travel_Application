@@ -6,6 +6,7 @@ import com.travel.trip.exception.DuplicateResourceException;
 import com.travel.trip.exception.ResourceNotFoundException;
 import com.travel.trip.exception.UnauthorizedException;
 import com.travel.trip.repository.TenantRepository;
+import com.travel.trip.repository.TripRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,23 +18,32 @@ import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class TenantService {
 
     private final TenantRepository tenantRepository;
+    private final TripRepository tripRepository;
     private final SecretKey secretKey;
     private final BCryptPasswordEncoder passwordEncoder;
     private final long jwtExpiration = 86400000L;
 
     public TenantService(TenantRepository tenantRepository,
+                         TripRepository tripRepository,
                          @Value("${app.jwt.secret}") String jwtSecret) {
         this.tenantRepository = tenantRepository;
+        this.tripRepository = tripRepository;
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
@@ -112,6 +122,10 @@ public class TenantService {
         if (request.getAccentColor() != null) tenant.setAccentColor(request.getAccentColor());
         if (request.getTagline() != null) tenant.setTagline(request.getTagline());
         if (request.getOrbIntensity() != null) tenant.setOrbIntensity(request.getOrbIntensity());
+        if (request.getLatitude() != null) tenant.setLatitude(request.getLatitude());
+        if (request.getLongitude() != null) tenant.setLongitude(request.getLongitude());
+        if (request.getPhone() != null) tenant.setPhone(request.getPhone());
+        if (request.getAddress() != null) tenant.setAddress(request.getAddress());
 
         tenantRepository.save(tenant);
         return toBrandingResponse(tenant);
@@ -162,6 +176,45 @@ public class TenantService {
         }
     }
 
+    public Map<String, Object> getAdminStats(UUID tenantId, String adminToken) {
+        validateAdminToken(tenantId, adminToken);
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("totalTrips", tripRepository.countByTenantId(tenantId));
+        stats.put("aiGenerations", tripRepository.countByTenantIdAndTripStatus(tenantId, "COMPLETED"));
+
+        BigDecimal revenue = tripRepository.sumEstimatedRevenue(tenantId);
+        stats.put("totalRevenue", revenue != null ? revenue : BigDecimal.ZERO);
+
+        List<Object[]> popularRows = tripRepository.findPopularDestinationsByTenant(tenantId);
+        List<Map<String, Object>> popular = new ArrayList<>();
+        for (Object[] row : popularRows) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("destination", row[0]);
+            entry.put("count", row[1]);
+            popular.add(entry);
+        }
+        stats.put("popularDestinations", popular);
+
+        List<Map<String, Object>> recentTrips = new ArrayList<>();
+        tripRepository.findTop5ByTenantIdOrderByCreatedAtDesc(tenantId).forEach(trip -> {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("id", trip.getId());
+            entry.put("userId", trip.getUserId());
+            entry.put("destination", trip.getDestination());
+            entry.put("budget", trip.getBudget());
+            entry.put("days", trip.getDays());
+            entry.put("travelType", trip.getTravelType());
+            entry.put("tripStatus", trip.getTripStatus());
+            entry.put("status", trip.getStatus());
+            entry.put("createdAt", trip.getCreatedAt());
+            recentTrips.add(entry);
+        });
+        stats.put("recentTrips", recentTrips);
+
+        return stats;
+    }
+
     private String generateAdminToken(UUID tenantId, String agencyName) {
         return Jwts.builder()
                 .subject(tenantId.toString())
@@ -187,7 +240,11 @@ public class TenantService {
                 tenant.getAccentColor(),
                 tenant.getTagline(),
                 tenant.getSubdomain(),
-                tenant.getOrbIntensity()
+                tenant.getOrbIntensity(),
+                tenant.getLatitude(),
+                tenant.getLongitude(),
+                tenant.getPhone(),
+                tenant.getAddress()
         );
     }
 }

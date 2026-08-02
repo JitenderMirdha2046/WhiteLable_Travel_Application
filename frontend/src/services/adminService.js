@@ -49,7 +49,17 @@ class AdminService {
       primaryColor: data.primaryColor,
       accentColor: data.accentColor,
       tagline: data.tagline || '',
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+      phone: data.phone || null,
+      address: data.address || null,
     })
+    return res.data
+  }
+
+  async getStats() {
+    const { getAdminStats } = await import('../api/adminApi')
+    const res = await getAdminStats()
     return res.data
   }
 

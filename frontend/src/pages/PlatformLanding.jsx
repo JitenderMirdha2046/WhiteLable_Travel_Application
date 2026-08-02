@@ -2,9 +2,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import {
-  FiCompass, FiStar, FiShield, FiZap, FiArrowRight, FiUsers, FiEdit3,
-  FiMonitor, FiGlobe, FiDollarSign, FiCheck, FiEye, FiEyeOff, FiLock, FiMail
+  FiCompass, FiStar, FiShield, FiZap, FiArrowRight, FiUsers, FiEdit3, FiCheck,
+  FiMonitor, FiGlobe, FiEye, FiEyeOff, FiLock, FiMail
 } from 'react-icons/fi'
+import RupeeIcon from '../components/ui/RupeeIcon'
 import adminService from '../services/adminService'
 
 const fadeUp = {
@@ -20,7 +21,7 @@ const platformFeatures = [
   { icon: FiZap, title: 'AI Trip Planning', desc: 'Powerful AI generates personalized itineraries. Smart budgets, routes, and recommendations.' },
   { icon: FiMonitor, title: 'Admin Dashboard', desc: 'Complete admin panel with analytics, user management, and billing controls.' },
   { icon: FiGlobe, title: 'Custom Domain', desc: 'Use your own domain or subdomain. Your customers see your brand, not ours.' },
-  { icon: FiDollarSign, title: 'Subscription Billing', desc: 'Starter $199/mo, Growth $499/mo. Enterprise plans available. Cancel anytime.' },
+  { icon: RupeeIcon, title: 'Subscription Billing', desc: 'Starter ₹199/mo, Growth ₹499/mo. Enterprise plans available. Cancel anytime.' },
 ]
 
 const steps = [
@@ -33,7 +34,7 @@ const steps = [
 const plans = [
   {
     name: 'Starter',
-    price: '$199',
+    price: '₹199',
     period: '/month',
     desc: 'Perfect for small agencies getting started with AI travel planning.',
     features: ['1 Agency Account', '3 Sub-Agents', '500 Trips/mo', 'Subdomain (.travelplanner.com)', 'Basic Branding', 'Email Support'],
@@ -42,7 +43,7 @@ const plans = [
   },
   {
     name: 'Growth',
-    price: '$499',
+    price: '₹499',
     period: '/month',
     desc: 'For growing agencies that need more power and flexibility.',
     features: ['1 Agency Account', '10 Sub-Agents', '2,000 Trips/mo', 'Custom Domain', 'Full Branding', 'Priority Support', 'Advanced Analytics'],

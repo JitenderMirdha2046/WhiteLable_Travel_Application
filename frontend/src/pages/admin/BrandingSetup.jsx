@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FiSave, FiUpload, FiEye, FiImage } from 'react-icons/fi'
+import { FiSave, FiUpload, FiEye, FiImage, FiPhone, FiMapPin, FiNavigation } from 'react-icons/fi'
+import toast from 'react-hot-toast'
 import adminService from '../../services/adminService'
 
 const PRESET_THEMES = [
@@ -42,6 +43,11 @@ export default function BrandingSetup() {
   const [overlayOpacity, setOverlayOpacity] = useState(70)
   const [overlayBlur, setOverlayBlur] = useState('sm')
   const [templateStyle, setTemplateStyle] = useState('modern')
+  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [latitude, setLatitude] = useState('')
+  const [longitude, setLongitude] = useState('')
+  const [locating, setLocating] = useState(false)
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -60,6 +66,10 @@ export default function BrandingSetup() {
         if (data.overlayOpacity != null) setOverlayOpacity(data.overlayOpacity)
         if (data.overlayBlur) setOverlayBlur(data.overlayBlur)
         if (data.templateStyle) setTemplateStyle(data.templateStyle)
+        if (data.phone) setPhone(data.phone)
+        if (data.address) setAddress(data.address)
+        if (data.latitude != null) setLatitude(String(data.latitude))
+        if (data.longitude != null) setLongitude(String(data.longitude))
       } catch (err) {
         console.warn('Could not fetch branding, using defaults:', err.message)
       } finally {
@@ -68,6 +78,53 @@ export default function BrandingSetup() {
     }
     fetchBranding()
   }, [])
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser')
+      return
+    }
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLatitude(pos.coords.latitude.toFixed(6))
+        setLongitude(pos.coords.longitude.toFixed(6))
+        setLocating(false)
+        toast.success('Location set to your current position')
+      },
+      () => {
+        setLocating(false)
+        toast.error('Could not get your location. Allow location access and try again.')
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
+
+  const geocodeAddress = async () => {
+    if (!address.trim()) {
+      toast.error('Enter an address first so we can find its coordinates')
+      return
+    }
+    setLocating(true)
+    try {
+      const query = `${address}, India`
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`
+      )
+      const results = await res.json()
+      if (!results || results.length === 0) {
+        toast.error('Could not find that address. Try adding a city or landmark.')
+        return
+      }
+      setLatitude(parseFloat(results[0].lat).toFixed(6))
+      setLongitude(parseFloat(results[0].lon).toFixed(6))
+      toast.success(`Found coordinates: ${results[0].display_name}`)
+    } catch {
+      toast.error('Geocoding service unavailable. Enter coordinates manually.')
+    } finally {
+      setLocating(false)
+    }
+  }
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0]
@@ -104,6 +161,10 @@ export default function BrandingSetup() {
         primaryColor,
         accentColor,
         tagline,
+        phone,
+        address,
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
       })
       if (result.logoUrl && result.logoUrl !== existingLogoUrl) {
         setLogoPreview(result.logoUrl)
@@ -358,6 +419,90 @@ export default function BrandingSetup() {
               className="input-field w-full"
               placeholder="Your agency's tagline..."
             />
+          </div>
+
+          {/* Location & Contact */}
+          <div className="card p-6">
+            <h2 className="font-semibold mb-4 flex items-center gap-2">
+              <FiMapPin className="w-4 h-4 text-primary-400" />
+              Location & Contact
+            </h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Shown to travelers on your customer portal so they know where your agency is and how to reach you.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Phone Number</label>
+                <div className="flex items-center gap-2">
+                  <FiPhone className="w-4 h-4 text-gray-500 shrink-0" />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="input-field w-full"
+                    placeholder="+91 98765 43210"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Office Address</label>
+                <textarea
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="input-field w-full resize-none"
+                  rows={2}
+                  placeholder="Shop 12, Mall Road, Manali, Himachal Pradesh"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Office Coordinates</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">Latitude</p>
+                    <input
+                      type="number"
+                      step="any"
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      className="input-field w-full"
+                      placeholder="e.g. 32.2396"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">Longitude</p>
+                    <input
+                      type="number"
+                      step="any"
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      className="input-field w-full"
+                      placeholder="e.g. 77.1887"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={useMyLocation}
+                  disabled={locating}
+                  className="btn-ghost text-xs flex items-center gap-1.5"
+                >
+                  <FiNavigation className="w-3.5 h-3.5" />
+                  {locating ? 'Getting location...' : 'Use my current location'}
+                </button>
+                <button
+                  onClick={geocodeAddress}
+                  disabled={locating}
+                  className="btn-ghost text-xs flex items-center gap-1.5"
+                >
+                  <FiMapPin className="w-3.5 h-3.5" />
+                  Find coordinates from address
+                </button>
+                {latitude && longitude && (
+                  <p className="text-[10px] text-gray-500 mt-2">
+                    {Number(latitude).toFixed(4)}°N, {Number(longitude).toFixed(4)}°E — travelers will see a map with this pin.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

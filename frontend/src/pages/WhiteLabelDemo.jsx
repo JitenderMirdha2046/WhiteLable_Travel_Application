@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiCompass, FiGrid, FiMapPin, FiDollarSign, FiCalendar, FiTag, FiStar, FiZap, FiUsers, FiGlobe, FiCheck, FiArrowRight, FiLayers } from 'react-icons/fi'
+import { FiCompass, FiGrid, FiMapPin, FiCalendar, FiTag, FiStar, FiZap, FiUsers, FiGlobe, FiCheck, FiArrowRight, FiLayers } from 'react-icons/fi'
+import RupeeIcon from '../components/ui/RupeeIcon'
 
 const AGENCIES = [
   {
@@ -365,7 +366,7 @@ export default function WhiteLabelDemo() {
             </div>
             <div className="bg-surface-lighter/30 rounded-xl p-3">
               <p className="text-xs text-gray-300 font-medium mb-1">💰 Recurring Revenue</p>
-              <p className="text-[10px] text-gray-500">Har agency se $199/month. 10 agencies = $1990/month. Koi extra dev cost nahi.</p>
+              <p className="text-[10px] text-gray-500">Har agency se ₹199/month. 10 agencies = ₹1990/month. Koi extra dev cost nahi.</p>
             </div>
           </div>
         </motion.div>

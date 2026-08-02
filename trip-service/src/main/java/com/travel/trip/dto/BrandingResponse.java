@@ -16,12 +16,17 @@ public class BrandingResponse {
     private String tagline;
     private String subdomain;
     private Integer orbIntensity;
+    private Double latitude;
+    private Double longitude;
+    private String phone;
+    private String address;
 
     public BrandingResponse(UUID tenantId, String agencyName, String logoUrl,
                             String backgroundImage, Integer overlayOpacity, String overlayBlur,
                             String templateStyle,
                             String primaryColor, String accentColor,
-                            String tagline, String subdomain, Integer orbIntensity) {
+                            String tagline, String subdomain, Integer orbIntensity,
+                            Double latitude, Double longitude, String phone, String address) {
         this.tenantId = tenantId;
         this.agencyName = agencyName;
         this.logoUrl = logoUrl;
@@ -34,6 +39,10 @@ public class BrandingResponse {
         this.tagline = tagline;
         this.subdomain = subdomain;
         this.orbIntensity = orbIntensity;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.phone = phone;
+        this.address = address;
     }
 
     public UUID getTenantId() { return tenantId; }
@@ -48,4 +57,8 @@ public class BrandingResponse {
     public String getTagline() { return tagline; }
     public String getSubdomain() { return subdomain; }
     public Integer getOrbIntensity() { return orbIntensity; }
+    public Double getLatitude() { return latitude; }
+    public Double getLongitude() { return longitude; }
+    public String getPhone() { return phone; }
+    public String getAddress() { return address; }
 }

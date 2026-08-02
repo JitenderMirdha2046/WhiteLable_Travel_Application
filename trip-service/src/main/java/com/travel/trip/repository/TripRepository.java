@@ -4,6 +4,7 @@ import com.travel.trip.entity.Trip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,4 +23,11 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
     List<Trip> searchByKeyword(@Param("userId") UUID userId, @Param("tenantId") UUID tenantId, @Param("keyword") String keyword);
 
     long countByTenantId(UUID tenantId);
+
+    long countByTenantIdAndTripStatus(UUID tenantId, String tripStatus);
+
+    List<Trip> findTop5ByTenantIdOrderByCreatedAtDesc(UUID tenantId);
+
+    @Query("SELECT COALESCE(SUM(COALESCE(t.totalEstimatedCost, t.budget)), 0) FROM Trip t WHERE t.tenantId = :tenantId")
+    BigDecimal sumEstimatedRevenue(@Param("tenantId") UUID tenantId);
 }

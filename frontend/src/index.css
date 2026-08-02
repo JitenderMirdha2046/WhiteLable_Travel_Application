@@ -7,13 +7,10 @@
     @apply border-surface-border;
   }
   
-  body {
-    @apply bg-surface text-gray-100 overflow-x-hidden;
-    scroll-behavior: smooth;
-    background-image: 
-      radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.04) 1px, transparent 0);
-    background-size: 40px 40px;
-  }
+   body {
+     @apply bg-surface text-gray-100 overflow-x-hidden;
+     scroll-behavior: smooth;
+   }
 
   ::-webkit-scrollbar {
     width: 6px;
@@ -109,36 +106,35 @@
     @apply border-gray-600;
   }
   
-  .btn-primary {
-    @apply px-6 py-3 text-white font-semibold rounded-lg
-           transition-all duration-300 ease-out
-           disabled:opacity-50 disabled:cursor-not-allowed
-           active:scale-[0.97]
-           hover:-translate-y-0.5;
-    background-image: linear-gradient(to right, var(--color-primary-dark), var(--color-primary));
-  }
-  .btn-primary:hover {
-    background-image: linear-gradient(to right, var(--color-primary), color-mix(in srgb, var(--color-primary) 100%, white 30%));
-    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--color-primary) 25%, transparent);
-  }
-  
-  .btn-secondary {
-    @apply px-6 py-3 bg-surface-lighter/80 border border-surface-border-light 
-           text-gray-200 font-semibold rounded-lg
-           transition-all duration-300 ease-out
-           active:scale-[0.97]
-           hover:shadow-lg hover:shadow-black/20
-           hover:-translate-y-0.5;
-  }
-  .btn-secondary:hover {
-    border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
-    background-color: #1a2332;
-  }
-  
-  .btn-ghost {
-    @apply px-4 py-2 text-gray-400 hover:text-white hover:bg-surface-lighter/60 
-           rounded-lg transition-all duration-200;
-  }
+   .btn-primary {
+     @apply px-6 py-3 text-white font-semibold rounded-lg
+            transition-all duration-300 ease-out
+            disabled:opacity-50 disabled:cursor-not-allowed
+            active:scale-[0.97];
+     background-image: linear-gradient(to right, var(--color-primary-dark), var(--color-primary));
+     box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent);
+   }
+   .btn-primary:hover {
+     background-image: linear-gradient(to right, var(--color-primary), #60a5fa);
+     box-shadow: 0 8px 20px color-mix(in srgb, var(--color-primary) 40%, transparent);
+   }
+   
+   .btn-secondary {
+     @apply px-6 py-3 bg-surface-lighter border border-surface-border-light 
+            text-gray-100 font-semibold rounded-lg
+            transition-all duration-300 ease-out
+            active:scale-[0.97];
+   }
+   .btn-secondary:hover {
+     border-color: color-mix(in srgb, var(--color-primary) 60%, transparent);
+     background-color: color-mix(in srgb, var(--color-primary) 15%, #233045);
+     box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 15%, transparent);
+   }
+   
+   .btn-ghost {
+     @apply px-4 py-2 text-gray-300 hover:text-white hover:bg-surface-lighter 
+            rounded-lg transition-all duration-200;
+   }
 
   .btn-icon {
     @apply p-2.5 text-gray-400 hover:text-white hover:bg-surface-lighter/60

@@ -57,6 +57,9 @@ public class TripService {
         trip.setDays(request.getDays());
         trip.setTravelType(request.getTravelType());
         trip.setMoodDescription(request.getMoodDescription());
+        if (request.getSelectedPlaces() != null && !request.getSelectedPlaces().isEmpty()) {
+            trip.setSelectedPlaces(String.join(",", request.getSelectedPlaces()));
+        }
         trip.setTripStatus("PENDING");
         trip.setStatus("ACTIVE");
         trip.setCacheUsed(false);
@@ -306,6 +309,7 @@ public class TripService {
         response.setCacheUsed(trip.getCacheUsed());
         response.setTotalEstimatedCost(trip.getTotalEstimatedCost());
         response.setItinerary(trip.getItinerary());
+        response.setSelectedPlaces(trip.getSelectedPlaces());
         response.setStatus(trip.getStatus());
         response.setCreatedAt(trip.getCreatedAt());
         return response;

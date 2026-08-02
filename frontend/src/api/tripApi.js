@@ -37,3 +37,11 @@ export const getCacheStats = () => api.get('/cache-stats')
 export const getPopularDestinations = () => api.get('/analytics/destinations')
 export const getAdminAnalytics = () => api.get('/analytics')
 export const searchTrips = (keyword) => api.get(`/search?keyword=${encodeURIComponent(keyword)}`)
+
+// Public destinations (tenant-active)
+export const getDestinations = () => {
+  const tenantId = localStorage.getItem('tenant_id')
+  return axios.get('/api/tenants/destinations', {
+    headers: tenantId ? { 'X-Tenant-Id': tenantId } : {},
+  })
+}

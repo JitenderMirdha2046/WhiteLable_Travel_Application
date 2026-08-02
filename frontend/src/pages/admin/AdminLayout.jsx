@@ -3,12 +3,13 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FiGrid, FiEdit3, FiUsers, FiCreditCard, FiLogOut,
-  FiMenu, FiX, FiCompass
+  FiMenu, FiX, FiCompass, FiMapPin
 } from 'react-icons/fi'
 
 const navItems = [
   { path: '/admin/overview', label: 'Overview', icon: FiGrid },
   { path: '/admin/branding', label: 'Branding', icon: FiEdit3 },
+  { path: '/admin/destinations', label: 'Destinations', icon: FiMapPin },
   { path: '/admin/users', label: 'Customers', icon: FiUsers },
   { path: '/admin/billing', label: 'Billing', icon: FiCreditCard },
 ]

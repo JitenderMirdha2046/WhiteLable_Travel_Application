@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { FiMapPin, FiDollarSign, FiCalendar, FiTag, FiDownload, FiShare2, FiArrowLeft, FiTrash2, FiCheck, FiSmile, FiSun, FiRefreshCw, FiBarChart2 } from 'react-icons/fi'
+import { FiMapPin, FiCalendar, FiTag, FiDownload, FiShare2, FiArrowLeft, FiTrash2, FiCheck, FiSmile, FiSun, FiRefreshCw, FiBarChart2 } from 'react-icons/fi'
+import RupeeIcon from '../components/ui/RupeeIcon'
 import toast from 'react-hot-toast'
 import tripService from '../services/tripService'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -11,10 +12,13 @@ import { Badge } from '../components/ui/badge'
 import { ErrorState } from '../components/ui/error-state'
 import { ConfirmDialog } from '../components/ui/confirm-dialog'
 import LeafletMapWrapper from '../components/LeafletMapWrapper'
+import { useTenant } from '../context/TenantProvider'
+import { downloadTripPDF } from '../utils/generatePDF'
 
 export default function TripDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const tenant = useTenant()
   const [trip, setTrip] = useState(null)
   const [budget, setBudget] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -106,17 +110,18 @@ export default function TripDetails() {
     }
   }
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!trip) return
-    const content = generatePDFContent(trip)
-    const blob = new Blob([content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${trip.destination}-Itinerary.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-    toast.success('Itinerary downloaded!')
+    try {
+      toast.loading('Generating PDF...')
+      await downloadTripPDF(trip, tenant?.branding)
+      toast.dismiss()
+      toast.success('PDF downloaded!')
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to generate PDF')
+      console.error(err)
+    }
   }
 
   const handleReplan = async () => {
@@ -223,7 +228,7 @@ export default function TripDetails() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 bg-surface-lighter rounded-xl">
-                <FiDollarSign className="w-5 h-5 text-accent-400 mb-2" />
+                <RupeeIcon className="w-5 h-5 text-accent-400 mb-2" />
                 <p className="text-xs text-gray-500">Budget</p>
                 <p className="text-sm font-semibold text-white">₹{trip.budget?.toLocaleString()}</p>
               </div>
@@ -281,6 +286,23 @@ export default function TripDetails() {
             <Button onClick={() => { setTrip(prev => prev ? { ...prev, tripStatus: 'GENERATING' } : prev); setPolling(true) }}>
               Try Again
             </Button>
+          </motion.div>
+        )}
+
+        {/* Selected Places */}
+        {trip.selectedPlaces && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card mb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <FiMapPin className="w-4 h-4 text-primary-400" />
+              <h3 className="text-sm font-medium text-white">Selected Attractions</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {trip.selectedPlaces.split(',').map((place, i) => (
+                <span key={i} className="text-xs px-3 py-1.5 rounded-full bg-primary-500/10 text-primary-300 border border-primary-500/20">
+                  {place.trim()}
+                </span>
+              ))}
+            </div>
           </motion.div>
         )}
 
@@ -475,45 +497,3 @@ export default function TripDetails() {
   )
 }
 
-function generatePDFContent(trip) {
-  const line = '='.repeat(50)
-  const sub = '-'.repeat(50)
-  const dayBlocks = (trip.itinerary || '').split(/\n\s*\n/).filter(b => b.trim().match(/^Day \d+:/im))
-
-  const content = [
-    line,
-    '  TRAVEL ITINERARY',
-    `  ${trip.destination}`,
-    line,
-    '',
-    `Destination: ${trip.destination}`,
-    `Budget: ₹${trip.budget?.toLocaleString()}`,
-    `Duration: ${trip.days} days`,
-    `Travel Type: ${trip.travelType}`,
-    `Status: ${trip.tripStatus || 'Generated'}`,
-    trip.moodDescription ? `Mood: ${trip.moodDescription}` : '',
-    trip.weatherSummary ? `Weather: ${trip.weatherSummary}` : '',
-    `Created: ${new Date(trip.createdAt).toLocaleDateString('en-US', {
-      day: 'numeric', month: 'long', year: 'numeric'
-    })}`,
-    '',
-    sub,
-    '  ITINERARY',
-    sub,
-    '',
-  ]
-
-  dayBlocks.forEach(block => {
-    const [header, ...rest] = block.split('\n')
-    const dayMatch = header.match(/^Day\s*\d+:\s*(.*)/i)
-    const dayTitle = dayMatch ? dayMatch[1] : header
-    content.push(`  ${dayTitle}`)
-    if (rest.length > 0) {
-      rest.forEach(r => content.push(`    ${r.trim()}`))
-    }
-    content.push('')
-  })
-
-  content.push(sub, '  Powered by TravelPlanner AI', line)
-  return content.join('\n')
-}

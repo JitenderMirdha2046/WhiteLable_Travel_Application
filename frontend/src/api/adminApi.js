@@ -38,3 +38,18 @@ export const uploadLogo = (file) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 }
+
+// Admin Destinations CRUD
+export const getAdminDestinations = () => api.get('/destinations/admin')
+export const createAdminDestination = (data) => api.post('/destinations', data)
+export const updateAdminDestination = (id, data) => api.put(`/destinations/${id}`, data)
+export const deleteAdminDestination = (id) => api.delete(`/destinations/${id}`)
+
+// Admin Places CRUD (nested under destinations)
+export const getAdminPlaces = (destId) => api.get(`/destinations/${destId}/places/admin`)
+export const createAdminPlace = (destId, data) => api.post(`/destinations/${destId}/places`, data)
+export const updateAdminPlace = (destId, id, data) => api.put(`/destinations/${destId}/places/${id}`, data)
+export const deleteAdminPlace = (destId, id) => api.delete(`/destinations/${destId}/places/${id}`)
+
+// Real usage analytics for the agency dashboard
+export const getAdminStats = () => api.get('/admin/stats')

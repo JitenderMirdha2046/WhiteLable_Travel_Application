@@ -88,7 +88,7 @@ export default function PricingPage() {
                 <div className="mb-4">
                   {plan.price > 0 ? (
                     <>
-                      <span className="text-4xl font-bold text-white">${plan.price}</span>
+                      <span className="text-4xl font-bold text-white">₹{plan.price}</span>
                       <span className="text-gray-400">{plan.period}</span>
                     </>
                   ) : (

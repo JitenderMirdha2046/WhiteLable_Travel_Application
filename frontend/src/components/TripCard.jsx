@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { FiMapPin, FiCalendar, FiDollarSign, FiTag } from 'react-icons/fi'
+import { FiMapPin, FiCalendar, FiTag } from 'react-icons/fi'
+import RupeeIcon from './ui/RupeeIcon'
 
 export default function TripCard({ trip, onClick, onDelete }) {
   const formatDate = (date) => new Date(date).toLocaleDateString('en-US', {
@@ -32,7 +33,7 @@ export default function TripCard({ trip, onClick, onDelete }) {
 
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-sm text-gray-400">
-          <FiDollarSign className="w-4 h-4 text-accent-400" />
+          <RupeeIcon className="w-4 h-4 text-accent-400" />
           <span>₹{trip.budget?.toLocaleString()}</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-400">

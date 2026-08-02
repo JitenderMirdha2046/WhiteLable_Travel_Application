@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiSearch, FiMapPin, FiDollarSign, FiStar, FiZap, FiChevronDown, FiChevronUp } from 'react-icons/fi'
+import { FiSearch, FiMapPin, FiStar, FiZap, FiChevronDown, FiChevronUp } from 'react-icons/fi'
+import RupeeIcon from '../components/ui/RupeeIcon'
 import toast from 'react-hot-toast'
 import tripService from '../services/tripService'
 import { Button } from '../components/ui/button'
@@ -8,7 +9,7 @@ import { Badge } from '../components/ui/badge'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const planColors = {
-  BUDGET: { bg: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/30', icon: FiDollarSign, label: 'Budget-Friendly' },
+  BUDGET: { bg: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/30', icon: RupeeIcon, label: 'Budget-Friendly' },
   LUXURY: { bg: 'from-purple-500/20 to-purple-500/5', border: 'border-purple-500/30', icon: FiStar, label: 'Luxury' },
   ADVENTURE: { bg: 'from-orange-500/20 to-orange-500/5', border: 'border-orange-500/30', icon: FiZap, label: 'Adventure' },
 }

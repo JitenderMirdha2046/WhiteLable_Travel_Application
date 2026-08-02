@@ -2,6 +2,7 @@ package com.travel.trip.dto;
 
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 public class CreateTripRequest {
@@ -25,6 +26,11 @@ public class CreateTripRequest {
     private String moodDescription;
 
     private UUID tenantId;
+
+    private List<String> selectedPlaces;
+
+    public List<String> getSelectedPlaces() { return selectedPlaces; }
+    public void setSelectedPlaces(List<String> selectedPlaces) { this.selectedPlaces = selectedPlaces; }
 
     public String getDestination() { return destination; }
     public void setDestination(String destination) { this.destination = destination; }

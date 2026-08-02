@@ -18,6 +18,7 @@ import AdminLogin from './pages/admin/AdminLogin'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminOverview from './pages/admin/AdminOverview'
 import BrandingSetup from './pages/admin/BrandingSetup'
+import DestinationManager from './pages/admin/DestinationManager'
 import CustomerList from './pages/admin/CustomerList'
 import BillingPage from './pages/admin/BillingPage'
 
@@ -53,6 +54,7 @@ export default function App() {
         <Route element={<AdminLayout />}>
           <Route path="/admin/overview" element={<AdminOverview />} />
           <Route path="/admin/branding" element={<BrandingSetup />} />
+          <Route path="/admin/destinations" element={<DestinationManager />} />
           <Route path="/admin/users" element={<CustomerList />} />
           <Route path="/admin/billing" element={<BillingPage />} />
         </Route>

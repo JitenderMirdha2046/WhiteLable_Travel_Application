@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -62,5 +63,12 @@ public class TenantController {
             @Valid @RequestBody BrandingRequest request) {
         tenantService.validateAdminToken(tenantId, adminToken);
         return ResponseEntity.ok(tenantService.updateBranding(tenantId, request));
+    }
+
+    @GetMapping("/admin/stats")
+    public ResponseEntity<Map<String, Object>> getAdminStats(
+            @RequestHeader("X-Tenant-Id") UUID tenantId,
+            @RequestHeader("X-Admin-Token") String adminToken) {
+        return ResponseEntity.ok(tenantService.getAdminStats(tenantId, adminToken));
     }
 }

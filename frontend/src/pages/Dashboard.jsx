@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiMapPin, FiCompass, FiTrendingUp, FiArrowRight, FiPlus, FiBarChart2, FiGlobe, FiZap, FiSearch } from 'react-icons/fi'
 import { useAuth } from '../context/AuthContext'
+import { useTenant } from '../context/TenantProvider'
 import tripService from '../services/tripService'
 import TripCard from '../components/TripCard'
+import AgencyMap from '../components/AgencyMap'
 import { StatsSkeleton, CardSkeleton } from '../components/ui/skeleton'
 import { ErrorState } from '../components/ui/error-state'
 import { EmptyState } from '../components/ui/empty-state'
@@ -12,6 +14,7 @@ import { EmptyState } from '../components/ui/empty-state'
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const tenant = useTenant()
   const [trips, setTrips] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -243,6 +246,19 @@ export default function Dashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Agency Location */}
+      <div className="mb-10">
+        <AgencyMap
+          agency={{
+            name: tenant.branding?.agencyName || 'Our Agency',
+            latitude: tenant.branding?.latitude,
+            longitude: tenant.branding?.longitude,
+            phone: tenant.branding?.phone,
+            address: tenant.branding?.address,
+          }}
+        />
+      </div>
 
       {/* Recent Trips */}
       <div className="flex items-center justify-between mb-6">

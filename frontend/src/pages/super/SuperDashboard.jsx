@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FiUsers, FiMap, FiActivity, FiDollarSign, FiShield } from 'react-icons/fi'
+import { FiUsers, FiMap, FiActivity, FiShield } from 'react-icons/fi'
+import RupeeIcon from '../../components/ui/RupeeIcon'
 import { getPlatformStats, getAllTenants } from '../../api/superAdminApi'
 import { Link } from 'react-router-dom'
 

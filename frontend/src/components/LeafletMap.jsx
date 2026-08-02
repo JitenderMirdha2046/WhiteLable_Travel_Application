@@ -12,6 +12,11 @@ L.Icon.Default.mergeOptions({
 const destinationCoords = {
   'Goa': [15.4909, 73.8278],
   'Manali': [32.2396, 77.1887],
+  'Shimla': [31.1048, 77.1734],
+  'Dharamshala': [32.2190, 76.3234],
+  'Kasol': [32.0101, 77.3150],
+  'Bir Billing': [32.0503, 76.7298],
+  'Spiti Valley': [32.2460, 78.0110],
   'Jaipur': [26.9124, 75.7873],
   'Kerala': [10.8505, 76.2711],
   'Ladakh': [34.1526, 77.5771],

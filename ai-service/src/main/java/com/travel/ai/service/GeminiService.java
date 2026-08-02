@@ -52,7 +52,7 @@ public class GeminiService {
         }
 
         prompt.append(" CRITICAL: You MUST mention SPECIFIC landmark names, temple names, fort names, museum names, market names, and restaurant names that actually exist in ")
-              .append(destination).append(". DO NOT use generic phrases like 'Visit main attractions' or 'Explore nearby markets'. Instead say things like 'Visit Hawa Mahal', 'Explore Johari Bazaar', 'Eat at Laxmi Mishthan Bhandar'. Be extremely specific with real place names. Include estimated costs per day.");
+              .append(destination).append(". DO NOT use generic phrases like 'Visit main attractions' or 'Explore nearby markets'. Instead say things like 'Visit Hawa Mahal', 'Explore Johari Bazaar', 'Eat at Laxmi Mishthan Bhandar'. Be extremely specific with real place names. Include estimated costs per day in Indian Rupees (₹) only. NEVER use $, USD, or any other currency.");
 
         try {
             Map<String, Object> requestBody = Map.of(

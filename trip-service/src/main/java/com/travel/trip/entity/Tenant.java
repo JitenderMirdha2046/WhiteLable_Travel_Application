@@ -75,6 +75,18 @@ public class Tenant {
     @Column(name = "subscription_ends_at")
     private LocalDateTime subscriptionEndsAt;
 
+    @Column(precision = 10, scale = 7)
+    private Double latitude;
+
+    @Column(precision = 10, scale = 7)
+    private Double longitude;
+
+    @Column(length = 20)
+    private String phone;
+
+    @Column(length = 500)
+    private String address;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -135,6 +147,14 @@ public class Tenant {
     public void setTrialEndsAt(LocalDateTime trialEndsAt) { this.trialEndsAt = trialEndsAt; }
     public LocalDateTime getSubscriptionEndsAt() { return subscriptionEndsAt; }
     public void setSubscriptionEndsAt(LocalDateTime subscriptionEndsAt) { this.subscriptionEndsAt = subscriptionEndsAt; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

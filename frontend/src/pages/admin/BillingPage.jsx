@@ -136,7 +136,7 @@ export default function BillingPage() {
                     <div className="mt-2">
                       {plan.price > 0 ? (
                         <>
-                          <span className="text-3xl font-bold">${plan.price}</span>
+                          <span className="text-3xl font-bold">₹{plan.price}</span>
                           <span className="text-gray-400 text-sm">{plan.period}</span>
                         </>
                       ) : (

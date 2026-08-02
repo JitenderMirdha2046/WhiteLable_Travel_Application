@@ -1,35 +1,98 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FiUsers, FiMap, FiTrendingUp, FiDollarSign, FiGlobe, FiCopy, FiCheck, FiExternalLink } from 'react-icons/fi'
+import { FiUsers, FiMap, FiTrendingUp, FiGlobe, FiCopy, FiCheck, FiExternalLink, FiMapPin } from 'react-icons/fi'
+import RupeeIcon from '../../components/ui/RupeeIcon'
+import toast from 'react-hot-toast'
+import adminService from '../../services/adminService'
 
-const stats = [
-  { label: 'Total Users', value: '156', icon: FiUsers, change: '+12%', color: 'from-blue-500 to-blue-600' },
-  { label: 'Total Trips', value: '423', icon: FiMap, change: '+8%', color: 'from-emerald-500 to-emerald-600' },
-  { label: 'AI Generations', value: '1,247', icon: FiTrendingUp, change: '+23%', color: 'from-purple-500 to-purple-600' },
-  { label: 'Revenue', value: '$3,450', icon: FiDollarSign, change: '+15%', color: 'from-amber-500 to-amber-600' },
-]
+function formatNumber(n) {
+  if (n == null || isNaN(n)) return '0'
+  return Number(n).toLocaleString('en-IN')
+}
 
-const recentTrips = [
-  { destination: 'Goa', user: 'Rahul S.', date: '2 hours ago', status: 'Completed' },
-  { destination: 'Manali', user: 'Priya M.', date: '5 hours ago', status: 'Generating' },
-  { destination: 'Jaipur', user: 'Amit K.', date: '1 day ago', status: 'Completed' },
-  { destination: 'Kerala', user: 'Neha G.', date: '2 days ago', status: 'Completed' },
-  { destination: 'Ladakh', user: 'Vikram P.', date: '3 days ago', status: 'Failed' },
-]
+function formatCurrency(n) {
+  if (n == null || isNaN(n)) return '₹0'
+  return '₹' + Number(n).toLocaleString('en-IN')
+}
+
+function timeAgo(iso) {
+  if (!iso) return ''
+  const then = new Date(iso)
+  const diff = Math.max(0, (Date.now() - then.getTime()) / 1000)
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hour${diff >= 7200 ? 's' : ''} ago`
+  if (diff < 604800) return `${Math.floor(diff / 86400)} day${diff >= 172800 ? 's' : ''} ago`
+  return then.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function statusLabel(status) {
+  const s = (status || '').toUpperCase()
+  if (s === 'COMPLETED') return 'Completed'
+  if (s === 'GENERATING') return 'Generating'
+  if (s === 'PENDING') return 'Pending'
+  if (s === 'FAILED') return 'Failed'
+  return s || 'Unknown'
+}
+
+function statusClass(status) {
+  const s = (status || '').toUpperCase()
+  if (s === 'COMPLETED') return 'bg-emerald-500/10 text-emerald-400'
+  if (s === 'GENERATING') return 'bg-amber-500/10 text-amber-400'
+  if (s === 'FAILED') return 'bg-red-500/10 text-red-400'
+  return 'bg-gray-500/10 text-gray-400'
+}
 
 export default function AdminOverview() {
   const [copied, setCopied] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [users, setUsers] = useState([])
+  const [stats, setStats] = useState({ totalTrips: 0, aiGenerations: 0, totalRevenue: 0, popularDestinations: [], recentTrips: [] })
+
   const subdomain = localStorage.getItem('admin_tenant_subdomain') || ''
   const tenantName = localStorage.getItem('admin_tenant_name') || 'Agency'
   const portalUrl = subdomain
     ? `${window.location.protocol}//${subdomain}.${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`
     : window.location.origin + '/?tenant=' + tenantName.toLowerCase().replace(/\s+/g, '')
 
+  useEffect(() => {
+    Promise.all([adminService.getUsers(), adminService.getStats()])
+      .then(([userList, statsData]) => {
+        setUsers(userList)
+        setStats({
+          totalTrips: statsData.totalTrips || 0,
+          aiGenerations: statsData.aiGenerations || 0,
+          totalRevenue: statsData.totalRevenue || 0,
+          popularDestinations: statsData.popularDestinations || [],
+          recentTrips: statsData.recentTrips || [],
+        })
+      })
+      .catch((err) => {
+        console.warn('Failed to load dashboard data:', err)
+        toast.error('Failed to load dashboard data')
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  const userNameById = (id) => {
+    const user = users.find((u) => u.id === id)
+    return user ? user.name : 'A traveler'
+  }
+
+  const statCards = [
+    { label: 'Total Users', value: formatNumber(users.length), icon: FiUsers, color: 'from-blue-500 to-blue-600' },
+    { label: 'Total Trips', value: formatNumber(stats.totalTrips), icon: FiMap, color: 'from-emerald-500 to-emerald-600' },
+    { label: 'AI Itineraries', value: formatNumber(stats.aiGenerations), icon: FiTrendingUp, color: 'from-purple-500 to-purple-600' },
+    { label: 'Trip Value', value: formatCurrency(stats.totalRevenue), icon: RupeeIcon, color: 'from-amber-500 to-amber-600' },
+  ]
+
   const copyUrl = () => {
     navigator.clipboard.writeText(portalUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
+
+  const maxPopularCount = Math.max(1, ...stats.popularDestinations.map((d) => Number(d.count) || 0))
 
   return (
     <div className="space-y-6">
@@ -95,74 +158,100 @@ export default function AdminOverview() {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="card p-5"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-gray-400">{stat.label}</p>
-                <p className="text-2xl font-bold mt-1">{stat.value}</p>
-              </div>
-              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
-                <stat.icon className="w-5 h-5 text-white" />
-              </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="card p-5 animate-pulse">
+              <div className="h-4 bg-surface-border/30 rounded w-1/3 mb-3" />
+              <div className="h-7 bg-surface-border/30 rounded w-2/3 mb-3" />
+              <div className="h-3 bg-surface-border/30 rounded w-1/2" />
             </div>
-            <div className="mt-3 flex items-center gap-1 text-sm">
-              <span className="text-emerald-400">{stat.change}</span>
-              <span className="text-gray-500">vs last month</span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card p-5">
-          <h2 className="font-semibold mb-4">Popular Destinations</h2>
-          <div className="space-y-3">
-            {['Goa', 'Manali', 'Jaipur', 'Kerala', 'Ladakh'].map((dest, i) => (
-              <div key={dest} className="flex items-center justify-between">
-                <span className="text-sm">{dest}</span>
-                <div className="flex items-center gap-2 flex-1 mx-4">
-                  <div className="h-2 bg-surface-border rounded-full flex-1 overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full"
-                      style={{ width: `${100 - i * 15}%` }}
-                    />
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {statCards.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="card p-5"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">{stat.label}</p>
+                    <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                  </div>
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-5 h-5 text-white" />
                   </div>
                 </div>
-                <span className="text-sm text-gray-400">{12 + i * 8} trips</span>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
 
-        <div className="card p-5">
-          <h2 className="font-semibold mb-4">Recent Trips</h2>
-          <div className="space-y-3">
-            {recentTrips.map((trip) => (
-              <div key={trip.destination + trip.user} className="flex items-center justify-between py-1">
-                <div>
-                  <p className="text-sm font-medium">{trip.destination}</p>
-                  <p className="text-xs text-gray-500">{trip.user} · {trip.date}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="card p-5">
+              <h2 className="font-semibold mb-4">Popular Destinations</h2>
+              {stats.popularDestinations.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-8">
+                  No trips planned yet. Share your customer portal link to get started.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {stats.popularDestinations.map((d) => (
+                    <div key={d.destination} className="flex items-center justify-between">
+                      <span className="text-sm flex items-center gap-1.5">
+                        <FiMapPin className="w-3.5 h-3.5 text-primary-400" />
+                        {d.destination}
+                      </span>
+                      <div className="flex items-center gap-2 flex-1 mx-4">
+                        <div className="h-2 bg-surface-border rounded-full flex-1 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full"
+                            style={{ width: `${Math.max(6, (Number(d.count) / maxPopularCount) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-400">{Number(d.count)} trip{d.count === 1 ? '' : 's'}</span>
+                    </div>
+                  ))}
                 </div>
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  trip.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' :
-                  trip.status === 'Generating' ? 'bg-amber-500/10 text-amber-400' :
-                  'bg-red-500/10 text-red-400'
-                }`}>
-                  {trip.status}
-                </span>
-              </div>
-            ))}
+              )}
+            </div>
+
+            <div className="card p-5">
+              <h2 className="font-semibold mb-4">Recent Trips</h2>
+              {stats.recentTrips.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-8">
+                  No trips yet. They'll appear here once your travelers start planning.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {stats.recentTrips.map((trip) => (
+                    <div key={trip.id} className="flex items-center justify-between py-1">
+                      <div>
+                        <p className="text-sm font-medium">{trip.destination}</p>
+                        <p className="text-xs text-gray-500">
+                          {userNameById(trip.userId)} · {timeAgo(trip.createdAt)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">{formatCurrency(trip.budget)}</span>
+                        <span className={`text-xs px-2 py-1 rounded-full ${statusClass(trip.tripStatus)}`}>
+                          {statusLabel(trip.tripStatus)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   )
 }
