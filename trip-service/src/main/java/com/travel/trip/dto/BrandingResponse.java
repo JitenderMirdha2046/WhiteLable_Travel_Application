@@ -21,13 +21,15 @@ public class BrandingResponse {
     private BigDecimal longitude;
     private String phone;
     private String address;
+    private String email;
 
     public BrandingResponse(UUID tenantId, String agencyName, String logoUrl,
                             String backgroundImage, Integer overlayOpacity, String overlayBlur,
                             String templateStyle,
                             String primaryColor, String accentColor,
                             String tagline, String subdomain, Integer orbIntensity,
-                            BigDecimal latitude, BigDecimal longitude, String phone, String address) {
+                            BigDecimal latitude, BigDecimal longitude, String phone, String address,
+                            String email) {
         this.tenantId = tenantId;
         this.agencyName = agencyName;
         this.logoUrl = logoUrl;
@@ -44,6 +46,7 @@ public class BrandingResponse {
         this.longitude = longitude;
         this.phone = phone;
         this.address = address;
+        this.email = email;
     }
 
     public UUID getTenantId() { return tenantId; }
@@ -62,4 +65,5 @@ public class BrandingResponse {
     public BigDecimal getLongitude() { return longitude; }
     public String getPhone() { return phone; }
     public String getAddress() { return address; }
+    public String getEmail() { return email; }
 }

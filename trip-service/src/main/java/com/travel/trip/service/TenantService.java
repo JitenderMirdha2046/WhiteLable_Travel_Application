@@ -244,7 +244,8 @@ public class TenantService {
                 tenant.getLatitude(),
                 tenant.getLongitude(),
                 tenant.getPhone(),
-                tenant.getAddress()
+                tenant.getAddress(),
+                tenant.getAdminEmail()
         );
     }
 }

@@ -14,6 +14,7 @@ import { ConfirmDialog } from '../components/ui/confirm-dialog'
 import LeafletMapWrapper from '../components/LeafletMapWrapper'
 import { useTenant } from '../context/TenantProvider'
 import { downloadTripPDF } from '../utils/generatePDF'
+import { parseItineraryDays, cleanItineraryLine } from '../utils/itinerary'
 
 export default function TripDetails() {
   const { id } = useParams()
@@ -174,8 +175,7 @@ export default function TripDetails() {
   const isCompleted = trip.tripStatus === 'COMPLETED'
 
   const itinerary = trip.itinerary || ''
-
-  const days = itinerary.split(/\n\s*\n/).filter(block => block.trim().match(/^Day \d+:/im))
+  const { intro: itineraryIntro, days } = parseItineraryDays(itinerary)
   const totalBudget = budget
     ? (budget.hotelCost || 0) + (budget.foodCost || 0) + (budget.transportCost || 0) + (budget.activityCost || 0) + (budget.miscCost || 0)
     : (trip.totalEstimatedCost || 0)
@@ -411,38 +411,47 @@ export default function TripDetails() {
               </div>
             ) : (
               <div className="space-y-4">
-                {days.map((day, i) => {
-                  const [header, ...rest] = day.split('\n')
-                  const dayNumMatch = header.match(/Day\s*(\d+):\s*(.*)/i)
-                  if (!dayNumMatch) return null
-                  const dayNum = dayNumMatch[1]
-                  const dayTitle = dayNumMatch[2]
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="card relative overflow-hidden group"
-                    >
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="flex items-start gap-4 pl-2">
-                        <div className="w-12 h-12 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <FiMapPin className="w-5 h-5 text-primary-400" />
+                {itineraryIntro && (
+                  <div className="card">
+                    <p className="text-gray-300 text-sm leading-relaxed">{itineraryIntro}</p>
+                  </div>
+                )}
+                {days.map((day, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="card relative overflow-hidden group"
+                  >
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-start gap-4 pl-2">
+                      <div className="w-12 h-12 bg-surface-lighter border border-surface-border-light text-primary-400 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <FiMapPin className="w-5 h-5 text-primary-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-lg font-semibold text-white">Day {day.dayNum}</h3>
+                          {day.title && <span className="text-xs text-gray-500">— {day.title}</span>}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-semibold text-white">Day {dayNum}</h3>
-                            <span className="text-xs text-gray-500">— {dayTitle}</span>
-                          </div>
-                          {rest.length > 0 && (
-                            <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">{rest.join('\n').trim()}</p>
-                          )}
+                        <div className="space-y-1.5">
+                          {day.content.map((line, li) => {
+                            const isSubheading = /^[A-Z][a-z]+:/.test(line) && line.length < 60
+                            const isTimeEntry = /^[\d:APM\s-]+[-–]/.test(line)
+                            return (
+                              <p
+                                key={li}
+                                className={`text-sm leading-relaxed ${isSubheading ? 'text-primary-300 font-semibold pt-1' : isTimeEntry ? 'text-white' : 'text-gray-400'}`}
+                              >
+                                {cleanItineraryLine(line)}
+                              </p>
+                            )
+                          })}
                         </div>
                       </div>
-                    </motion.div>
-                  )
-                })}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             )}
           </>

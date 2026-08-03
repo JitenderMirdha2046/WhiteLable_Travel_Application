@@ -1,11 +1,9 @@
 import { jsPDF } from 'jspdf'
+import { parseItineraryDays } from './itinerary'
 
-const PRIMARY = '#3b82f6'
-const ACCENT = '#a855f7'
-const DARK = '#0f172a'
-const SURFACE = '#1e293b'
-const TEXT = '#e2e8f0'
-const TEXT_MUTED = '#94a3b8'
+const BLACK = [0, 0, 0]
+const GRAY = [80, 80, 80]
+const WHITE = [255, 255, 255]
 
 function toDataURL(url) {
   return new Promise((resolve) => {
@@ -31,93 +29,69 @@ export async function downloadTripPDF(trip, branding) {
   const margin = 18
   const contentW = pw - margin * 2
 
-  const primary = branding?.primaryColor || PRIMARY
-  const accent = branding?.accentColor || ACCENT
-  const agencyName = branding?.name || 'Travel Agency'
+  const agencyName = branding?.agencyName || branding?.name || 'Travel Agency'
+  const phone = branding?.phone || ''
+  const email = branding?.email || ''
   const tagline = branding?.tagline || ''
 
-  let logoData = null
-  if (branding?.logoUrl) {
-    logoData = await toDataURL(branding.logoUrl)
-  }
-
-  const days = (trip.itinerary || '')
-    .split(/\n\s*\n/)
-    .filter((b) => b.trim().match(/^Day \d+:/im))
+  const { intro: itineraryIntro, days } = parseItineraryDays(trip.itinerary)
 
   let y = margin
 
   // ── COVER PAGE ──
-  pdf.setFillColor(15, 23, 42)
+  pdf.setFillColor(...WHITE)
   pdf.rect(0, 0, pw, ph, 'F')
 
-  // Accent bar at top
-  pdf.setFillColor(primary)
-  pdf.rect(0, 0, pw, 6, 'F')
+  // Agency header
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(22)
+  pdf.setTextColor(...BLACK)
+  pdf.text(agencyName, margin, y + 8)
 
-  // Logo
-  if (logoData) {
-    const logoH = 14
-    const logoW = 50
-    try {
-      pdf.addImage(logoData, 'PNG', margin, y + 20, logoW, logoH)
-    } catch {}
-    y += logoH + 30
-  } else {
-    // Agency name fallback
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(22)
-    pdf.setTextColor(primary)
-    pdf.text(agencyName, margin, y + 40)
-    y += 48
-  }
-
-  if (tagline) {
+  const contactParts = []
+  if (phone) contactParts.push(`Phone: ${phone}`)
+  if (email) contactParts.push(`Email: ${email}`)
+  if (tagline) contactParts.push(tagline)
+  if (contactParts.length > 0) {
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(11)
-    pdf.setTextColor(TEXT_MUTED)
-    pdf.text(tagline, margin, y)
-    y += 8
+    pdf.setTextColor(...GRAY)
+    pdf.text(contactParts.join('   |   '), margin, y + 16)
+    y += 22
+  } else {
+    y += 16
   }
 
-  y += 20
+  // Separator line
+  pdf.setDrawColor(...BLACK)
+  pdf.setLineWidth(0.5)
+  pdf.line(margin, y, margin + contentW, y)
+  y += 16
 
   // Destination title
   pdf.setFont('helvetica', 'bold')
-  pdf.setFontSize(32)
-  pdf.setTextColor(TEXT)
+  pdf.setFontSize(30)
+  pdf.setTextColor(...BLACK)
   const lines = pdf.splitTextToSize(trip.destination, contentW)
   lines.forEach((l) => {
     pdf.text(l, margin, y)
-    y += 14
+    y += 13
   })
 
   pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(14)
-  pdf.setTextColor(TEXT_MUTED)
-  pdf.text('AI-Generated Travel Itinerary', margin, y)
-  y += 8
+  pdf.setFontSize(13)
+  pdf.setTextColor(...GRAY)
+  pdf.text('Travel Itinerary', margin, y)
+  y += 7
 
   const createdDate = trip.createdAt
     ? new Date(trip.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
     : ''
   pdf.setFontSize(10)
-  pdf.setTextColor(TEXT_MUTED)
-  pdf.text(`Created on ${createdDate}`, margin, y)
-  y += 20
+  pdf.text(createdDate ? `Created on ${createdDate}` : '', margin, y)
+  y += 16
 
-  // Trip summary box
-  const boxH = 50
-  const boxY = y
-  pdf.setFillColor(30, 41, 59)
-  pdf.roundedRect(margin, boxY, contentW, boxH, 4, 4, 'F')
-
-  // Accent border left
-  pdf.setFillColor(primary)
-  pdf.rect(margin, boxY, 3, boxH, 'F')
-
-  pdf.setFont('helvetica', 'bold')
-  pdf.setFontSize(10)
+  // Trip summary
   const items = [
     { label: 'Budget', value: `₹${(trip.budget || 0).toLocaleString()}` },
     { label: 'Duration', value: `${trip.days || 0} days` },
@@ -126,72 +100,89 @@ export async function downloadTripPDF(trip, branding) {
   ]
   const itemW = contentW / 4
   items.forEach((item, i) => {
-    const ix = margin + i * itemW + 8
-    pdf.setTextColor(TEXT_MUTED)
-    pdf.text(item.label, ix, boxY + 12)
+    const ix = margin + i * itemW
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(12)
-    pdf.setTextColor(TEXT)
-    pdf.text(item.value, ix, boxY + 30)
     pdf.setFontSize(10)
+    pdf.setTextColor(...GRAY)
+    pdf.text(item.label, ix, y)
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(13)
+    pdf.setTextColor(...BLACK)
+    pdf.text(item.value, ix, y + 7)
   })
-
-  y = boxY + boxH + 16
+  y += 22
 
   // Selected Places
   if (trip.selectedPlaces) {
     const placesList = trip.selectedPlaces.split(',').map((s) => s.trim()).filter(Boolean)
     if (placesList.length > 0) {
       pdf.setFont('helvetica', 'bold')
-      pdf.setFontSize(11)
-      pdf.setTextColor(primary)
+      pdf.setFontSize(12)
+      pdf.setTextColor(...BLACK)
       pdf.text('Selected Attractions', margin, y)
-      y += 6
+      y += 7
       pdf.setFont('helvetica', 'normal')
       pdf.setFontSize(10)
-      pdf.setTextColor(TEXT_MUTED)
+      pdf.setTextColor(...GRAY)
       const placesStr = placesList.join('  •  ')
       const placeLines = pdf.splitTextToSize(placesStr, contentW)
       placeLines.forEach((l) => {
         pdf.text(l, margin, y)
         y += 5
       })
-      y += 8
+      y += 10
     }
   }
 
   // Mood section
   if (trip.moodDescription) {
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(11)
-    pdf.setTextColor(accent)
+    pdf.setFontSize(12)
+    pdf.setTextColor(...BLACK)
     pdf.text('Mood', margin, y)
-    y += 6
+    y += 7
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(10)
-    pdf.setTextColor(TEXT_MUTED)
+    pdf.setTextColor(...GRAY)
     const moodLines = pdf.splitTextToSize(trip.moodDescription, contentW)
     moodLines.forEach((l) => {
       pdf.text(l, margin, y)
       y += 5
     })
-    y += 8
+    y += 10
   }
 
   // Weather
   if (trip.weatherSummary) {
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(11)
-    pdf.setTextColor('#fbbf24')
+    pdf.setFontSize(12)
+    pdf.setTextColor(...BLACK)
     pdf.text('Weather Forecast', margin, y)
-    y += 6
+    y += 7
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(10)
-    pdf.setTextColor(TEXT_MUTED)
+    pdf.setTextColor(...GRAY)
     const wLines = pdf.splitTextToSize(trip.weatherSummary, contentW)
     wLines.forEach((l) => {
       pdf.text(l, margin, y)
       y += 5
+    })
+    y += 10
+  }
+
+  // Intro paragraph
+  if (itineraryIntro) {
+    if (y > ph - 60) {
+      pdf.addPage()
+      y = margin + 6
+    }
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(10.5)
+    pdf.setTextColor(...GRAY)
+    const introLines = pdf.splitTextToSize(itineraryIntro, contentW)
+    introLines.forEach((l) => {
+      pdf.text(l, margin, y)
+      y += 5.5
     })
     y += 8
   }
@@ -204,58 +195,48 @@ export async function downloadTripPDF(trip, branding) {
     const bd = trip.budgetBreakdown
     const bLabels = ['Hotel', 'Food', 'Transport', 'Activities', 'Misc']
     const bKeys = ['hotelCost', 'foodCost', 'transportCost', 'activityCost', 'miscCost']
-    const bColors = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#f97316']
     const totalBudget = bKeys.reduce((s, k) => s + (bd[k] || 0), 0)
-
-    pdf.setFillColor(primary)
-    pdf.rect(0, 0, pw, 6, 'F')
 
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(20)
-    pdf.setTextColor(TEXT)
+    pdf.setTextColor(...BLACK)
     pdf.text('Budget Breakdown', margin, y)
-    y += 16
+    y += 14
 
-    // Budget bar visualization
     pdf.setFontSize(10)
     bKeys.forEach((k, i) => {
       const val = bd[k] || 0
       const pct = totalBudget > 0 ? val / totalBudget : 0
       const barW = contentW * pct
-      const barH = 14
-      const labelX = margin
-      const valX = margin + contentW
 
       pdf.setFont('helvetica', 'bold')
-      pdf.setFontSize(10)
-      pdf.setTextColor(TEXT)
-      pdf.text(bLabels[i], labelX, y + 4)
+      pdf.setFontSize(11)
+      pdf.setTextColor(...BLACK)
+      pdf.text(bLabels[i], margin, y)
 
       pdf.setFont('helvetica', 'normal')
-      pdf.setTextColor(TEXT_MUTED)
+      pdf.setTextColor(...GRAY)
       const valStr = `₹${val.toLocaleString()}`
       const valW = pdf.getTextWidth(valStr)
-      pdf.text(valStr, valX - valW, y + 4)
+      pdf.text(valStr, margin + contentW - valW, y)
 
       if (barW > 0) {
-        pdf.setFillColor(bColors[i])
-        pdf.roundedRect(margin, y + 8, Math.max(barW, 4), 6, 2, 2, 'F')
+        pdf.setFillColor(...BLACK)
+        pdf.roundedRect(margin, y + 4, Math.max(barW, 4), 2.5, 1, 1, 'F')
       }
 
-      y += 22
+      y += 12
     })
 
-    // Total
-    y += 4
-    pdf.setDrawColor(primary)
+    y += 6
+    pdf.setDrawColor(...BLACK)
     pdf.setLineWidth(0.5)
     pdf.line(margin, y, margin + contentW, y)
-    y += 8
+    y += 9
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(14)
-    pdf.setTextColor(TEXT)
-    const totalStr = `Total: ₹${totalBudget.toLocaleString()}`
-    pdf.text(totalStr, margin, y)
+    pdf.setTextColor(...BLACK)
+    pdf.text(`Total: ₹${totalBudget.toLocaleString()}`, margin, y)
   }
 
   // ── ITINERARY PAGES ──
@@ -264,80 +245,54 @@ export async function downloadTripPDF(trip, branding) {
       pdf.addPage()
       y = margin + 6
 
-      pdf.setFillColor(primary)
-      pdf.rect(0, 0, pw, 6, 'F')
-
-      const [header, ...rest] = day.split('\n')
-      const dayMatch = header.match(/Day\s*(\d+):\s*(.*)/i)
-      const dayNum = dayMatch ? dayMatch[1] : (i + 1).toString()
-      const dayTitle = dayMatch ? dayMatch[2] : header
-
-      // Day header
       pdf.setFont('helvetica', 'bold')
-      pdf.setFontSize(22)
-      pdf.setTextColor(TEXT)
-      pdf.text(`Day ${dayNum}`, margin, y)
-      y += 12
+      pdf.setFontSize(20)
+      pdf.setTextColor(...BLACK)
+      pdf.text(`Day ${day.dayNum}`, margin, y)
+      y += 10
 
-      pdf.setFont('helvetica', 'normal')
-      pdf.setFontSize(14)
-      pdf.setTextColor(accent)
-      const titleLines = pdf.splitTextToSize(dayTitle, contentW)
-      titleLines.forEach((l) => {
-        pdf.text(l, margin, y)
-        y += 8
-      })
+      if (day.title) {
+        pdf.setFont('helvetica', 'bold')
+        pdf.setFontSize(13)
+        pdf.setTextColor(...BLACK)
+        const titleLines = pdf.splitTextToSize(day.title, contentW)
+        titleLines.forEach((l) => {
+          pdf.text(l, margin, y)
+          y += 7
+        })
+      }
 
       y += 4
-
-      // Separator
-      pdf.setDrawColor(primary)
+      pdf.setDrawColor(...BLACK)
       pdf.setLineWidth(0.3)
       pdf.line(margin, y, margin + contentW, y)
       y += 8
 
-      // Activities
-      pdf.setFont('helvetica', 'normal')
-      pdf.setFontSize(10)
-      pdf.setTextColor(TEXT_MUTED)
-
-      const text = rest.join('\n').trim()
-      // Try to parse time-based entries (e.g. "8:00 AM - Breakfast" or "Morning: Visit temple")
-      const entries = text.split('\n').filter((l) => l.trim())
-
-      entries.forEach((entry) => {
-        const trimmed = entry.trim()
-
-        // Check if it's a time entry (starts with time pattern or "-")
-        const isTimeEntry = /^[\d:APM\s-]+[-–]/.test(trimmed) || /^- /.test(trimmed)
-        const isSubheading = /^[A-Z][a-z]+:/.test(trimmed) && trimmed.length < 50
+      day.content.forEach((trimmed) => {
+        const isSubheading = /^[A-Z][a-z]+:/.test(trimmed) && trimmed.length < 60
+        const isTimeEntry = /^[\d:APM\s-]+[-–]/.test(trimmed)
 
         if (isSubheading) {
           y += 2
           pdf.setFont('helvetica', 'bold')
-          pdf.setFontSize(10)
-          pdf.setTextColor(TEXT)
+          pdf.setFontSize(10.5)
+          pdf.setTextColor(...BLACK)
           const subLines = pdf.splitTextToSize(trimmed, contentW)
           subLines.forEach((l) => {
             pdf.text(l, margin, y)
             y += 5.5
           })
-          pdf.setFont('helvetica', 'normal')
-          pdf.setFontSize(10)
-          pdf.setTextColor(TEXT_MUTED)
         } else if (isTimeEntry) {
-          const timeColor = primary
-          // Highlight time part
           const timeMatch = trimmed.match(/^([\d:APM\s-]+[-–])/)
           if (timeMatch) {
             pdf.setFont('helvetica', 'bold')
             pdf.setFontSize(10)
-            pdf.setTextColor(timeColor)
+            pdf.setTextColor(...BLACK)
             const timePart = timeMatch[1]
             pdf.text(timePart, margin, y)
             const tw = pdf.getTextWidth(timePart)
             pdf.setFont('helvetica', 'normal')
-            pdf.setTextColor(TEXT_MUTED)
+            pdf.setTextColor(...GRAY)
             const restText = trimmed.slice(timePart.length).trim()
             const restLines = pdf.splitTextToSize(restText, contentW - tw - 2)
             restLines.forEach((l, li) => {
@@ -345,6 +300,9 @@ export async function downloadTripPDF(trip, branding) {
               y += 5.5
             })
           } else {
+            pdf.setFont('helvetica', 'normal')
+            pdf.setFontSize(10)
+            pdf.setTextColor(...GRAY)
             const entryLines = pdf.splitTextToSize(trimmed, contentW)
             entryLines.forEach((l) => {
               pdf.text(l, margin, y)
@@ -352,6 +310,9 @@ export async function downloadTripPDF(trip, branding) {
             })
           }
         } else {
+          pdf.setFont('helvetica', 'normal')
+          pdf.setFontSize(10)
+          pdf.setTextColor(...GRAY)
           const entryLines = pdf.splitTextToSize(trimmed, contentW)
           entryLines.forEach((l) => {
             pdf.text(l, margin, y)
@@ -359,15 +320,9 @@ export async function downloadTripPDF(trip, branding) {
           })
         }
 
-        // Check if we need a new page
         if (y > ph - 30) {
           pdf.addPage()
           y = margin + 6
-          pdf.setFillColor(primary)
-          pdf.rect(0, 0, pw, 6, 'F')
-          pdf.setFont('helvetica', 'normal')
-          pdf.setFontSize(10)
-          pdf.setTextColor(TEXT_MUTED)
         }
       })
     })
@@ -377,14 +332,15 @@ export async function downloadTripPDF(trip, branding) {
   const totalPages = pdf.getNumberOfPages()
   for (let i = 1; i <= totalPages; i++) {
     pdf.setPage(i)
-    pdf.setFillColor(primary)
-    pdf.rect(0, ph - 12, pw, 12, 'F')
+    pdf.setDrawColor(...GRAY)
+    pdf.setLineWidth(0.2)
+    pdf.line(margin, ph - 14, margin + contentW, ph - 14)
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(8)
-    pdf.setTextColor('#ffffff')
-    const footerText = `Powered by ${agencyName}  |  Page ${i} of ${totalPages}`
+    pdf.setTextColor(...GRAY)
+    const footerText = `${agencyName}  |  Page ${i} of ${totalPages}`
     const fw = pdf.getTextWidth(footerText)
-    pdf.text(footerText, (pw - fw) / 2, ph - 4)
+    pdf.text(footerText, (pw - fw) / 2, ph - 7)
   }
 
   pdf.save(`${trip.destination.replace(/[^a-zA-Z0-9]/g, '-')}-Itinerary.pdf`)
